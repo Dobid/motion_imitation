@@ -1,32 +1,23 @@
 <mxfile>
     <diagram id="Lm4nKWto8GY6URv-1aVc" name="Page-1">
-        <mxGraphModel dx="1487" dy="728" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1657" dy="728" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="15" value="motion_imitation/run.py : main()" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="1" vertex="1">
-                    <mxGeometry x="-270" y="20" width="310" height="190" as="geometry"/>
+                <mxCell id="29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="25" target="27">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="16" value="# parse command args" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="15" vertex="1">
-                    <mxGeometry y="26" width="310" height="26" as="geometry"/>
+                <mxCell id="25" value="motion_imitation/run.py : main()" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;" vertex="1" parent="1">
+                    <mxGeometry x="-520" y="20" width="230" height="140" as="geometry"/>
                 </mxCell>
-                <mxCell id="17" value="# get num of CPUs" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="15" vertex="1">
-                    <mxGeometry y="52" width="310" height="26" as="geometry"/>
+                <mxCell id="26" value="# parse command args&#10;&#10;# get num of CPUs&#10;&#10;# build environement&#10;env = env_builder.build_imitation_env()&#10;- motion_files, num_cpu" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;" vertex="1" parent="25">
+                    <mxGeometry y="30" width="230" height="110" as="geometry"/>
                 </mxCell>
-                <mxCell id="18" value="# build environement&#10;env = env_builder.build_imitation_env()&#10;- motion_files, num_cpu" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="15" vertex="1">
-                    <mxGeometry y="78" width="310" height="112" as="geometry"/>
+                <mxCell id="27" value="motion_imitation/envs/env_builder.py : build_imitation_env()" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;" vertex="1" parent="1">
+                    <mxGeometry x="-490" y="310" width="530" height="520" as="geometry"/>
                 </mxCell>
-                <mxCell id="20" value="motion_imitation/envs/env_builder.py : build_imitation_env()" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="1" vertex="1">
-                    <mxGeometry x="-420" y="280" width="390" height="190" as="geometry"/>
-                </mxCell>
-                <mxCell id="21" value="# sets episode length" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="20" vertex="1">
-                    <mxGeometry y="26" width="390" height="26" as="geometry"/>
-                </mxCell>
-                <mxCell id="22" value="# get num of CPUs" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="20" vertex="1">
-                    <mxGeometry y="52" width="390" height="26" as="geometry"/>
-                </mxCell>
-                <mxCell id="23" value="# build environement&#10;env = env_builder.build_imitation_env()&#10;- motion_files, num_cpu" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="20" vertex="1">
-                    <mxGeometry y="78" width="390" height="112" as="geometry"/>
+                <mxCell id="28" value="# sets episode length&#10;&#10;# creates simulation parameters&#10;sim_params = SimulationParameters()&#10;sim_params = ...&#10;&#10;# sets simulation parameters&#10;gym_config = LocomotionGymConfig(sim_params)&#10;&#10;# sets sensors&#10;HistoricSensorWrapper()&#10;MotorAngleSensor&#10;IMUSensor&#10;LastActionsSensor&#10;&#10;# sets tast : imitation task&#10;imitation_task.ImitationTask()&#10;&#10;# sets randomizers&#10;ControllableEnvRandomizerFromConfig()&#10;&#10;# creates the env&#10;env = LocomotionGymEnv(gym_config, robot_class = Laikago, randomizers, sensors, task)&#10;&#10;# flatten observation . transcript it to an array&#10;env = ObservationDictionnaryToArrayWrapper(env)&#10;&#10;# add the trajectory&#10;env = TrajectoryGeneratorWrapper(env, trajectory_generator)&#10;btw : traj_gen = simple_openloop.LaikagoPoseOffsetGenerator()&#10;&#10;# another wrapper :&#10;env = imitationWrapperEnv()&#10;return env" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;" vertex="1" parent="27">
+                    <mxGeometry y="30" width="530" height="490" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
