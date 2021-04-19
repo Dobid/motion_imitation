@@ -540,7 +540,7 @@ class ImitationTask(object):
     motions = []
     for filename in filenames:
       curr_motion = motion_data.MotionData(filename)
-
+      # print("curr_motion = ", curr_motion._frames)
       curr_duration = curr_motion.get_duration()
       total_time += curr_duration
       motions.append(curr_motion)
