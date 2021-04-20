@@ -14,12 +14,18 @@ class A1GymEnv(gym.Env):
                action_limit=(0.75, 0.75, 0.75),
                render=False,
                on_rack=False):
-    self._env = env_builder.build_regular_env(
-        a1.A1,
-        motor_control_mode=robot_config.MotorControlMode.POSITION,
-        enable_rendering=render,
-        action_limit=action_limit,
-        on_rack=on_rack)
+
+    self._env = env_builder.build_imitation_env(motion_files=['motion_imitation/data/motions/dog_pace.txt'],
+                                        num_parallel_envs=1,
+                                        mode='train',
+                                        enable_randomizer=True,
+                                        enable_rendering=True)
+    # self._env = env_builder.build_regular_env(
+    #     a1.A1,
+    #     motor_control_mode=robot_config.MotorControlMode.POSITION,
+    #     enable_rendering=render,
+    #     action_limit=action_limit,
+    #     on_rack=on_rack)
     self.observation_space = self._env.observation_space
     self.action_space = self._env.action_space
 
