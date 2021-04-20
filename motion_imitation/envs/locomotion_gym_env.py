@@ -23,6 +23,7 @@ import pybullet  # pytype: disable=import-error
 import pybullet_utils.bullet_client as bullet_client
 import pybullet_data as pd
 import random
+from pathlib import Path
 
 from motion_imitation.robots import robot_config
 from motion_imitation.envs.sensors import sensor
@@ -69,6 +70,7 @@ class LocomotionGymEnv(gym.Env):
     self.seed()
     self._gym_config = gym_config
     self._robot_class = robot_class
+    print("robot class = ", self._robot_class)
     self._robot_sensors = robot_sensors
 
     self._sensors = env_sensors if env_sensors is not None else list()
@@ -78,6 +80,7 @@ class LocomotionGymEnv(gym.Env):
     # A dictionary containing the objects in the world other than the robot.
     self._world_dict = {}
     self._task = task
+    print("task : ", self._task)
 
     self._env_randomizers = env_randomizers if env_randomizers else []
 
@@ -171,6 +174,9 @@ class LocomotionGymEnv(gym.Env):
       self.action_space = spaces.Box(np.array(action_lower_bound),
                                      np.array(action_upper_bound),
                                      dtype=np.float32)
+      print("self.action_space = ", self.action_space, Path(__file__).resolve())
+      print("self.action_space.low = ", self.action_space.low)
+      print("self.action_space.high = ", self.action_space.high)
 
   def close(self):
     if hasattr(self, '_robot') and self._robot:

@@ -149,6 +149,9 @@ def main():
   os.environ["CUDA_VISIBLE_DEVICES"] = '-1'
   
   enable_env_rand = ENABLE_ENV_RANDOMIZER and (args.mode != "test")
+  print(enable_env_rand)
+  print("args : ", args.__dict__)
+  print("num_procs = ", num_procs)
   env = env_builder.build_imitation_env(motion_files=[args.motion_file],
                                         num_parallel_envs=num_procs,
                                         mode=args.mode,
