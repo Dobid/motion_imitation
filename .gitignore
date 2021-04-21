@@ -1,2 +1,3 @@
 build/
-motion_imitation/__pycache__/
+__pycache__/
+output/
