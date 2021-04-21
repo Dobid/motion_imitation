@@ -1,5 +1,6 @@
 """Wrapper to make the a1 environment suitable for OpenAI gym."""
 import gym
+from mpi4py import MPI
 
 from motion_imitation.envs import env_builder
 from motion_imitation.robots import a1
@@ -14,12 +15,12 @@ class A1GymEnv(gym.Env):
                action_limit=(0.75, 0.75, 0.75),
                render=False,
                on_rack=False):
-
+    num_procs = MPI.COMM_WORLD.Get_size()
     self._env = env_builder.build_imitation_env(motion_files=['motion_imitation/data/motions/dog_pace.txt'],
-                                        num_parallel_envs=1,
+                                        num_parallel_envs=num_procs,
                                         mode='train',
                                         enable_randomizer=True,
-                                        enable_rendering=True)
+                                        enable_rendering=False)
     # self._env = env_builder.build_regular_env(
     #     a1.A1,
     #     motor_control_mode=robot_config.MotorControlMode.POSITION,
