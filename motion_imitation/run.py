@@ -15,6 +15,7 @@
 
 import os
 import inspect
+from motion_imitation.utilities.debug_logger import logd
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 os.sys.path.insert(0, parentdir)
@@ -149,9 +150,6 @@ def main():
   os.environ["CUDA_VISIBLE_DEVICES"] = '-1'
   
   enable_env_rand = ENABLE_ENV_RANDOMIZER and (args.mode != "test")
-  print(enable_env_rand)
-  print("args : ", args.__dict__)
-  print("num_procs = ", num_procs)
   env = env_builder.build_imitation_env(motion_files=[args.motion_file],
                                         num_parallel_envs=num_procs,
                                         mode=args.mode,
@@ -167,6 +165,7 @@ def main():
   
   if args.model_file != "":
     model.load_parameters(args.model_file)
+    # model.load(load_path=args.model_file, env=env)
 
   if args.mode == "train":
       train(model=model, 

@@ -8,3 +8,6 @@ action_lower_bound.extend([-6.28] * 5)
 
 action_space = gym.spaces.Box(np.array(action_lower_bound), np.array(action_upper_bound), dtype = np.float32)
 print(action_space)
+
+array = [1,2,3,4]
+print(np.tile(array, 3))

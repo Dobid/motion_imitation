@@ -20,7 +20,7 @@ class A1GymEnv(gym.Env):
                                         num_parallel_envs=num_procs,
                                         mode='train',
                                         enable_randomizer=True,
-                                        enable_rendering=False)
+                                        enable_rendering=True)
     # self._env = env_builder.build_regular_env(
     #     a1.A1,
     #     motor_control_mode=robot_config.MotorControlMode.POSITION,

@@ -31,6 +31,7 @@ import numpy as np
 import typing
 
 from motion_imitation.envs.sensors import sensor
+from motion_imitation.utilities.debug_logger import logd
 
 _ARRAY = typing.Iterable[float] # pylint: disable=invalid-name
 
@@ -119,6 +120,7 @@ class HistoricSensorWrapper(SensorWrapper):
           np.expand_dims(wrapped_sensor.get_upper_bound(), -1),
           (1, self._num_history))
     else:
+      logd.info("lower bound wrapped sensor [%s] = %s \n",name, wrapped_sensor.get_lower_bound())
       lower_bound = np.tile(wrapped_sensor.get_lower_bound(),
                             self._num_history)
       upper_bound = np.tile(wrapped_sensor.get_upper_bound(),
