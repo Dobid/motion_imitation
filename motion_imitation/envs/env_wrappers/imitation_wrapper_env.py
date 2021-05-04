@@ -21,7 +21,7 @@ from __future__ import print_function
 
 import gym
 import numpy as np
-
+from motion_imitation.utilities.debug_logger import logd
 
 class ImitationWrapperEnv(object):
   """An env using for training policy with motion imitation."""
@@ -126,15 +126,16 @@ class ImitationWrapperEnv(object):
       observations and target observations.
     """
     obs_space0 = self._gym_env.observation_space
+
     low0 = obs_space0.low
     high0 = obs_space0.high
-
+    logd.info("low : %s | \nhigh : %s", low0, high0)
     task_low, task_high = self._task.get_target_obs_bounds()
     low = np.concatenate([low0, task_low], axis=-1)
     high = np.concatenate([high0, task_high], axis=-1)
 
     obs_space = gym.spaces.Box(low, high)
-
+    logd.info("obs_space = %s", obs_space)
     return obs_space
 
   def _enable_curriculum(self):

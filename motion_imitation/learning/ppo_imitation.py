@@ -15,12 +15,14 @@
 
 import os
 import inspect
+import traceback
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(os.path.dirname(currentdir))
 os.sys.path.insert(0, parentdir)
 
 import time
 from collections import deque
+from motion_imitation.utilities.debug_logger import logd
 
 import numpy as np
 import tensorflow as tf
@@ -65,7 +67,6 @@ def add_vtarg_and_adv(seg, gamma, lam):
   seg["tdlamret"] = seg["adv"] + seg["vpred"]
 
   return
-
 class PPOImitation(pposgd_simple.PPO1):
     """
     Proximal Policy Optimization algorithm (MPI version).
@@ -124,6 +125,7 @@ class PPOImitation(pposgd_simple.PPO1):
 
 
     def setup_model(self):
+      traceback.print_stack()
       with SetVerbosity(self.verbose):
 
         self.graph = tf.Graph()

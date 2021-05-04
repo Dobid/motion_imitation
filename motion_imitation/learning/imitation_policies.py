@@ -14,9 +14,9 @@
 # limitations under the License.
 
 import warnings
+from motion_imitation.utilities.debug_logger import logd
 import numpy as np
 import tensorflow as tf
-from pathlib import Path
 
 from stable_baselines.common.distributions import make_proba_dist_type, spaces, \
     DiagGaussianProbabilityDistributionType
@@ -29,7 +29,6 @@ def make_proba_dist_type(ac_space):
     :param ac_space: (Gym Space) the input action space
     :return: (ProbabilityDistributionType) the appropriate instance of a ProbabilityDistributionType
     """
-    print("action_space : ", ac_space, Path(__file__).resolve())
     if isinstance(ac_space, spaces.Box):
         assert len(ac_space.shape) == 1, "Error: the action space must be a vector"
         return DiagGaussianFixedVarProbabilityDistributionType(ac_space.shape[0])
@@ -94,7 +93,6 @@ class ImitationPolicy(FeedForwardPolicy):
                 layers = [64, 64]
             net_arch = [dict(vf=layers, pi=layers)]
         with tf.variable_scope("model", reuse=reuse):
-            print("feature extraction : ", feature_extraction)
             if feature_extraction == "cnn":
                 pi_latent = vf_latent = cnn_extractor(self.processed_obs, **kwargs)
             else:

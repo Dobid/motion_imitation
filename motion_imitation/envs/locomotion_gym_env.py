@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from motion_imitation.utilities.debug_logger import logd
 """This file implements the locomotion gym env."""
 import collections
 import time
@@ -174,9 +176,9 @@ class LocomotionGymEnv(gym.Env):
       self.action_space = spaces.Box(np.array(action_lower_bound),
                                      np.array(action_upper_bound),
                                      dtype=np.float32)
-      print("self.action_space = ", self.action_space, Path(__file__).resolve())
-      print("self.action_space.low = ", self.action_space.low)
-      print("self.action_space.high = ", self.action_space.high)
+      logd.info("self.action_space = %s", self.action_space)
+      logd.info("self.action_space.low = %s", self.action_space.low)
+      logd.info("self.action_space.high = %s", self.action_space.high)
 
   def close(self):
     if hasattr(self, '_robot') and self._robot:
@@ -216,10 +218,13 @@ class LocomotionGymEnv(gym.Env):
     Returns:
       A numpy array contains the initial observation after reset.
     """
+    # if want to reset terrain for random terrain at each episode :
+    reset_terrain = True
+
     if self._is_render:
       self._pybullet_client.configureDebugVisualizer(
           self._pybullet_client.COV_ENABLE_RENDERING, 0)
-
+        
     # Clear the simulation world and rebuild the robot interface.
     if self._hard_reset:
       self._pybullet_client.resetSimulation()
@@ -228,10 +233,10 @@ class LocomotionGymEnv(gym.Env):
       self._pybullet_client.setTimeStep(self._sim_time_step)
       self._pybullet_client.setGravity(0, 0, -10)
 
-     # generate rugged terrain for the robot
-      col = 256 
-      rows = 256
-      height_perturbation_range = 0.05
+      # generate rugged terrain for the robot
+      col = 80
+      rows = 700
+      height_perturbation_range = 0.09
       terrain_data = [0] * col * rows
       for j in range(int(col / 2)):
           for i in range(int(rows / 2)):
@@ -248,15 +253,15 @@ class LocomotionGymEnv(gym.Env):
           numHeightfieldRows=rows,
           numHeightfieldColumns=col)
       # TODO : Chercher dans la doc pour trouver comment faire des bosses sur une plus grande surface
-      terrain = self._pybullet_client.loadURDF("plane_implicit.urdf")
+      terrain_rugged = self._pybullet_client.loadURDF("plane_implicit.urdf")
 
-      terrain = self._pybullet_client.createMultiBody(0, terrain_shape)
-      self._pybullet_client.resetBasePositionAndOrientation(terrain, [0, 0, 0], [0, 0, 0, 1])
-      self._pybullet_client.changeVisualShape(terrain, -1, rgbaColor=[1, 1, 1, 1])
+      terrain_rugged = self._pybullet_client.createMultiBody(0, terrain_shape)
+      self._pybullet_client.resetBasePositionAndOrientation(terrain_rugged, [0, 0, 0], [0, 0, 0, 1])
+      self._pybullet_client.changeVisualShape(terrain_rugged, -1, rgbaColor=[1, 1, 1, 1])
 
       # Rebuild the world.
       self._world_dict = {
-          "ground": terrain
+          "ground": terrain_rugged
       }
       # self._world_dict = {
       #     "ground": self._pybullet_client.loadURDF("plane_implicit.urdf")
