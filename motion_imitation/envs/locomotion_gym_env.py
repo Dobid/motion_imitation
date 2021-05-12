@@ -233,39 +233,41 @@ class LocomotionGymEnv(gym.Env):
       self._pybullet_client.setTimeStep(self._sim_time_step)
       self._pybullet_client.setGravity(0, 0, -10)
 
-      # generate rugged terrain for the robot
-      col = 80
-      rows = 700
-      height_perturbation_range = 0.09
-      terrain_data = [0] * col * rows
-      for j in range(int(col / 2)):
-          for i in range(int(rows / 2)):
-              height = random.uniform(0, height_perturbation_range)
-              terrain_data[2 * i + 2 * j * rows] = height
-              terrain_data[2 * i + 1 + 2 * j * rows] = height
-              terrain_data[2 * i + (2 * j + 1) * rows] = height
-              terrain_data[2 * i + 1 + (2 * j + 1) * rows] = height
-      terrain_shape = self._pybullet_client.createCollisionShape(
-          shapeType=self._pybullet_client.GEOM_HEIGHTFIELD,
-          meshScale=[.05, .05, 1],
-          heightfieldTextureScaling=(rows - 1) / 2,
-          heightfieldData=terrain_data,
-          numHeightfieldRows=rows,
-          numHeightfieldColumns=col)
-      # TODO : Chercher dans la doc pour trouver comment faire des bosses sur une plus grande surface
-      terrain_rugged = self._pybullet_client.loadURDF("plane_implicit.urdf")
+      """
+      generate rugged terrain for the robot
+      """
+      # col = 80
+      # rows = 700
+      # height_perturbation_range = 0.09
+      # terrain_data = [0] * col * rows
+      # for j in range(int(col / 2)):
+      #     for i in range(int(rows / 2)):
+      #         height = random.uniform(0, height_perturbation_range)
+      #         terrain_data[2 * i + 2 * j * rows] = height
+      #         terrain_data[2 * i + 1 + 2 * j * rows] = height
+      #         terrain_data[2 * i + (2 * j + 1) * rows] = height
+      #         terrain_data[2 * i + 1 + (2 * j + 1) * rows] = height
+      # terrain_shape = self._pybullet_client.createCollisionShape(
+      #     shapeType=self._pybullet_client.GEOM_HEIGHTFIELD,
+      #     meshScale=[.05, .05, 1],
+      #     heightfieldTextureScaling=(rows - 1) / 2,
+      #     heightfieldData=terrain_data,
+      #     numHeightfieldRows=rows,
+      #     numHeightfieldColumns=col)
+      # # TODO : Chercher dans la doc pour trouver comment faire des bosses sur une plus grande surface
+      # terrain_rugged = self._pybullet_client.loadURDF("plane_implicit.urdf")
 
-      terrain_rugged = self._pybullet_client.createMultiBody(0, terrain_shape)
-      self._pybullet_client.resetBasePositionAndOrientation(terrain_rugged, [0, 0, 0], [0, 0, 0, 1])
-      self._pybullet_client.changeVisualShape(terrain_rugged, -1, rgbaColor=[1, 1, 1, 1])
+      # terrain_rugged = self._pybullet_client.createMultiBody(0, terrain_shape)
+      # self._pybullet_client.resetBasePositionAndOrientation(terrain_rugged, [0, 0, 0], [0, 0, 0, 1])
+      # self._pybullet_client.changeVisualShape(terrain_rugged, -1, rgbaColor=[1, 1, 1, 1])
 
       # Rebuild the world.
-      self._world_dict = {
-          "ground": terrain_rugged
-      }
       # self._world_dict = {
-      #     "ground": self._pybullet_client.loadURDF("plane_implicit.urdf")
+      #     "ground": terrain_rugged
       # }
+      self._world_dict = {
+          "ground": self._pybullet_client.loadURDF("plane_implicit.urdf")
+      }
       # Rebuild the robot
       self._robot = self._robot_class(
           pybullet_client=self._pybullet_client,
@@ -469,6 +471,7 @@ class LocomotionGymEnv(gym.Env):
       sensors_dict[s.get_name()] = s.get_observation()
 
     observations = collections.OrderedDict(sorted(list(sensors_dict.items())))
+    # print("observations = ", observations)
     return observations
 
   def set_time_step(self, num_action_repeat, sim_step=0.001):

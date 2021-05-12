@@ -76,6 +76,15 @@ class ImitationPolicy(FeedForwardPolicy):
                  act_fun=tf.tanh, cnn_extractor=nature_cnn, feature_extraction="mlp", **kwargs):
         super(FeedForwardPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=reuse,
                                                 scale=(feature_extraction == "cnn"))
+        print("OB_SPACE = ", ob_space)
+        print("AC_SPACE = ", ac_space)
+        print("N_ENV = ", n_env)
+        print("N_STEPS = ", n_steps)
+        print("N_BATCH = ", n_batch)
+        print("REUSE = ", reuse)
+        print("LAYERS = ", layers)
+        print("NET_ARCH = ", net_arch)
+        print("KWARGS = ", kwargs)
 
         self._pdtype = make_proba_dist_type(ac_space)
 

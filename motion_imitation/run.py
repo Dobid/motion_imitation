@@ -61,6 +61,7 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
   timesteps_per_actorbatch = int(np.ceil(float(timesteps_per_actorbatch) / num_procs))
   optim_batchsize = int(np.ceil(float(optim_batchsize) / num_procs))
 
+  print("building model")
   model = ppo_imitation.PPOImitation(
                policy=imitation_policies.ImitationPolicy,
                env=env,
@@ -156,16 +157,20 @@ def main():
                                         enable_randomizer=enable_env_rand,
                                         enable_rendering=args.visualize)
   
-  model = build_model(env=env,
+    
+  if args.model_file != "":
+    print("loading model from provided model file")
+    # model.load_parameters(args.model_file)
+    # model.load(load_path=args.model_file, env=env)
+    model = ppo_imitation.PPOImitation.load(load_path=args.model_file, env=env)
+    model.tensorboard_log = args.output_dir
+  else:
+    print("no provided model file, creating a new one")
+    model = build_model(env=env,
                       num_procs=num_procs,
                       timesteps_per_actorbatch=TIMESTEPS_PER_ACTORBATCH,
                       optim_batchsize=OPTIM_BATCHSIZE,
                       output_dir=args.output_dir)
-
-  
-  if args.model_file != "":
-    model.load_parameters(args.model_file)
-    # model.load(load_path=args.model_file, env=env)
 
   if args.mode == "train":
       train(model=model, 
@@ -180,7 +185,8 @@ def main():
            num_episodes=args.num_test_episodes)
   else:
       assert False, "Unsupported mode: " + args.mode
-
+  # Use this in the terminal to start the tensorboard server  
+  # tensorboard --logdir=./tfb_logs/ --port=8090 --host=127.0.0.1
   return
 
 if __name__ == '__main__':

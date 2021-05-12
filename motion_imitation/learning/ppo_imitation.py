@@ -125,6 +125,7 @@ class PPOImitation(pposgd_simple.PPO1):
 
 
     def setup_model(self):
+      print("setup_model : ppo_imitation.py -> PPOImitation.setup_model()")
       traceback.print_stack()
       with SetVerbosity(self.verbose):
 
