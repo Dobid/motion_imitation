@@ -178,8 +178,10 @@ class BoxSpaceSensor(Sensor):
     return self._upper_bound
 
   def _get_observation(self) -> _ARRAY:
+    print("_get_observation")
     """Returns raw observation"""
     raise NotImplementedError()
 
   def get_observation(self) -> np.ndarray:
+    # print("observation = ", self._get_observation())
     return np.asarray(self._get_observation(), dtype=self._dtype)
