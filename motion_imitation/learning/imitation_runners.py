@@ -132,6 +132,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
             observation, true_reward, done, info = env.step(clipped_action[0])
         else:
             observation, reward, done, info = env.step(clipped_action[0])
+            print("obs_imitatation runners = ", observation)
             true_reward = reward
 
         if callback is not None:

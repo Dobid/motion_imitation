@@ -114,6 +114,7 @@ class ImitationWrapperEnv(object):
       observations from the reference motion.
     """
     target_observation = self._task.build_target_obs()
+    # print("target obs = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
 
