@@ -276,6 +276,7 @@ class PPOImitation(pposgd_simple.PPO1):
                         logger.log("********** Iteration %i ************" % iters_so_far)
 
                     seg = seg_gen.__next__()
+                    # print("seg = ", seg)
 
                     # Stop training early (triggered by the callback)
                     if not seg.get('continue_training', True):  # pytype: disable=attribute-error
@@ -309,7 +310,7 @@ class PPOImitation(pposgd_simple.PPO1):
                     if is_root:
                         logger.log("Optimizing...")
                         logger.log(fmt_row(13, self.loss_names))
-
+                    go = True
                     # Here we do a bunch of optimization epochs over the data
                     for k in range(self.optim_epochs):
                         # list of tuples, each of which gives the loss for a minibatch
@@ -321,6 +322,9 @@ class PPOImitation(pposgd_simple.PPO1):
                             if writer is not None:
                                 # run loss backprop with summary, but once every 10 runs save the metadata
                                 # (memory, compute time, ...)
+                                # if go is True:
+                                #     print("batch[ob] = ", batch["ob"][0:30])
+                                #     go = False
                                 if self.full_tensorboard_log and (1 + k) % 10 == 0:
                                     run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                                     run_metadata = tf.RunMetadata()
