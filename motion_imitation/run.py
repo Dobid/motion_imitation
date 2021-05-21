@@ -101,7 +101,7 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
 
   return
 
-def test(model, env, num_procs, num_episodes=None):
+def test(model, env, num_procs, only_reference=False, num_episodes=None):
   curr_return = 0
   sum_return = 0
   episode_count = 0
@@ -144,6 +144,7 @@ def main():
   arg_parser.add_argument("--model_file", dest="model_file", type=str, default="")
   arg_parser.add_argument("--total_timesteps", dest="total_timesteps", type=int, default=2e8)
   arg_parser.add_argument("--int_save_freq", dest="int_save_freq", type=int, default=0) # save intermediate model every n policy steps
+  arg_parser.add_argument("--only_reference", dest="only_reference", type=bool, default=False)
 
   args = arg_parser.parse_args()
   

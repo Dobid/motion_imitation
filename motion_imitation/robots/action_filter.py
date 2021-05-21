@@ -93,9 +93,6 @@ class ActionFilter(object):
     else:
       raise ValueError('%s filter type not supported' % (ftype))
 
-    logging.info('Filter shapes: a: %s, b: %s', self.a.shape, self.b.shape)
-    logging.info('Filter type:%s', ftype)
-
     self.yhist = collections.deque(maxlen=self.hist_len)
     self.xhist = collections.deque(maxlen=self.hist_len)
     self.reset()

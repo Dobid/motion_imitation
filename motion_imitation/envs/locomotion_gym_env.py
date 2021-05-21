@@ -176,9 +176,9 @@ class LocomotionGymEnv(gym.Env):
       self.action_space = spaces.Box(np.array(action_lower_bound),
                                      np.array(action_upper_bound),
                                      dtype=np.float32)
-      logd.info("self.action_space = %s", self.action_space)
-      logd.info("self.action_space.low = %s", self.action_space.low)
-      logd.info("self.action_space.high = %s", self.action_space.high)
+      # logd.info("self.action_space = %s", self.action_space)
+      # logd.info("self.action_space.low = %s", self.action_space.low)
+      # logd.info("self.action_space.high = %s", self.action_space.high)
 
   def close(self):
     if hasattr(self, '_robot') and self._robot:
@@ -202,7 +202,8 @@ class LocomotionGymEnv(gym.Env):
   def reset(self,
             initial_motor_angles=None,
             reset_duration=0.0,
-            reset_visualization_camera=True):
+            reset_visualization_camera=True,
+            only_reference=False):
     """Resets the robot's position in the world or rebuild the sim world.
 
     The simulation world will be rebuilt if self._hard_reset is True.

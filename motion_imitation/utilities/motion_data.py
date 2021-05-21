@@ -451,7 +451,6 @@ class MotionData(object):
 
     self.set_frame_root_pos(blend_root_pos, blend_frame)
     self.set_frame_root_rot(blend_root_rot, blend_frame)
-
     return blend_frame
 
   def calc_frame_vel(self, time):

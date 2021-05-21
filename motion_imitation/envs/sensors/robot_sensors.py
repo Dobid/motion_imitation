@@ -247,7 +247,7 @@ class IMUSensor(sensor.BoxSpaceSensor):
     self._channels = channels if channels else ["R", "P", "dR", "dP"]
     self._num_channels = len(self._channels)
     self._noisy_reading = noisy_reading
-
+    print("channels = ", self._channels)
     # Compute the default lower and upper bounds
     if lower_bound is None and upper_bound is None:
       lower_bound = []

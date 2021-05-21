@@ -41,7 +41,6 @@ def imitation_terminal_condition(env,
   Returns:
     A boolean indicating if episode is over.
   """
-
   pyb = env._pybullet_client
   task = env._task
 
