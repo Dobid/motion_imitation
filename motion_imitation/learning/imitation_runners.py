@@ -16,6 +16,7 @@
 import gym
 import numpy as np
 
+from motion_imitation.utilities.debug_logger import logd
 from stable_baselines.common.vec_env import VecEnv
 
 def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, callback=None):
@@ -132,7 +133,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
             observation, true_reward, done, info = env.step(clipped_action[0])
         else:
             observation, reward, done, info = env.step(clipped_action[0])
-            print("obs_imitatation runners = ", observation)
+            # print("obs_imitatation runners = ", observation.shape)
             true_reward = reward
 
         if callback is not None:

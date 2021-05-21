@@ -114,7 +114,6 @@ class ImitationWrapperEnv(object):
       observations from the reference motion.
     """
     target_observation = self._task.build_target_obs()
-    # print("target obs = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
 
@@ -130,7 +129,7 @@ class ImitationWrapperEnv(object):
 
     low0 = obs_space0.low
     high0 = obs_space0.high
-    logd.info("low : %s | \nhigh : %s", low0, high0)
+    logd.info("low0 : %s | \nhigh0 : %s", low0.shape, high0.shape)
     task_low, task_high = self._task.get_target_obs_bounds()
     low = np.concatenate([low0, task_low], axis=-1)
     high = np.concatenate([high0, task_high], axis=-1)

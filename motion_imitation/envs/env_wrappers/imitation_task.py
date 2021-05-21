@@ -34,6 +34,7 @@ from motion_imitation.utilities import pose3d
 from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
+from motion_imitation.utilities.debug_logger import logd
 
 
 class ImitationTask(object):
@@ -170,7 +171,7 @@ class ImitationTask(object):
   def __call__(self, env):
     return self.reward(env)
 
-  def reset(self, env):
+  def reset(self, env, only_reference=False):
     """Resets the internal state of the task."""
     self._env = env
     self._last_base_position = self._get_sim_base_position()
@@ -261,51 +262,63 @@ class ImitationTask(object):
     return self._ref_motions[self._active_motion_id]
 
   def build_target_obs(self):
-    """Constructs the target observations, consisting of a sequence of
-
-    target frames for future timesteps. The tartet poses to include is
-    specified by self._tar_frame_steps.
+    """Constructs the target observations, consisting of linear and angular velocities of the body/root of the robot
 
     Returns:
-      An array containing the target frames.
+      An array containing the velocity of the body/root of the robot
     """
-    tar_poses = []
 
     time0 = self._get_motion_time()
-    dt = self._env.env_time_step
-    motion = self.get_active_motion()
+    basevel_lin_ang = self._calc_ref_vel(time0)[0:6]
+    # print("vel = ", basevel_lin_ang)
 
-    robot = self._env.robot
-    ref_base_pos = self._get_ref_base_position()
-    sim_base_rot = np.array(robot.GetBaseOrientation())
+    return basevel_lin_ang
 
-    heading = motion_util.calc_heading(sim_base_rot)
-    if self._tar_obs_noise is not None:
-      heading += self._randn(0, self._tar_obs_noise[0])
-    inv_heading_rot = transformations.quaternion_about_axis(-heading, [0, 0, 1])
+  # def build_target_obs(self):
+  #   """Constructs the target observations, consisting of a sequence of
 
-    for step in self._tar_frame_steps:
-      tar_time = time0 + step * dt
-      tar_pose = self._calc_ref_pose(tar_time)
+  #   target frames for future timesteps. The tartet poses to include is
+  #   specified by self._tar_frame_steps.
 
-      tar_root_pos = motion.get_frame_root_pos(tar_pose)
-      tar_root_rot = motion.get_frame_root_rot(tar_pose)
+  #   Returns:
+  #     An array containing the target frames.
+  #   """
+  #   tar_poses = []
 
-      tar_root_pos -= ref_base_pos
-      tar_root_pos = pose3d.QuaternionRotatePoint(tar_root_pos, inv_heading_rot)
+  #   time0 = self._get_motion_time()
+  #   dt = self._env.env_time_step
+  #   motion = self.get_active_motion()
+  #   # print("vel = ", self._calc_ref_vel(time0)[0:6])
 
-      tar_root_rot = transformations.quaternion_multiply(
-          inv_heading_rot, tar_root_rot)
-      tar_root_rot = motion_util.standardize_quaternion(tar_root_rot)
+  #   robot = self._env.robot
+  #   ref_base_pos = self._get_ref_base_position()
+  #   sim_base_rot = np.array(robot.GetBaseOrientation())
 
-      motion.set_frame_root_pos(tar_root_pos, tar_pose)
-      motion.set_frame_root_rot(tar_root_rot, tar_pose)
+  #   heading = motion_util.calc_heading(sim_base_rot)
+  #   if self._tar_obs_noise is not None:
+  #     heading += self._randn(0, self._tar_obs_noise[0])
+  #   inv_heading_rot = transformations.quaternion_about_axis(-heading, [0, 0, 1])
 
-      tar_poses.append(tar_pose)
+  #   for step in self._tar_frame_steps:
+  #     tar_time = time0 + step * dt
+  #     tar_pose = self._calc_ref_pose(tar_time)
+  #     tar_root_pos = motion.get_frame_root_pos(tar_pose)
+  #     tar_root_rot = motion.get_frame_root_rot(tar_pose)
 
-    tar_obs = np.concatenate(tar_poses, axis=-1)
+  #     tar_root_pos -= ref_base_pos
+  #     tar_root_pos = pose3d.QuaternionRotatePoint(tar_root_pos, inv_heading_rot)
 
-    return tar_obs
+  #     tar_root_rot = transformations.quaternion_multiply(
+  #         inv_heading_rot, tar_root_rot)
+  #     tar_root_rot = motion_util.standardize_quaternion(tar_root_rot)
+
+  #     motion.set_frame_root_pos(tar_root_pos, tar_pose)
+  #     motion.set_frame_root_rot(tar_root_rot, tar_pose)
+
+  #     tar_poses.append(tar_pose)
+  #   tar_obs = np.concatenate(tar_poses, axis=-1)
+
+  #   return tar_obs
 
   def get_target_obs_bounds(self):
     """Get bounds for target observations.
@@ -316,34 +329,48 @@ class ImitationTask(object):
       high: Array containing the maximum value for each target observation
         features.
     """
-    pos_bound = 2 * np.ones(motion_data.MotionData.POS_SIZE)
-    rot_bound = 1 * np.ones(motion_data.MotionData.ROT_SIZE)
-
-    pose_size = self.get_pose_size()
-    low = np.inf * np.ones(pose_size)
-    high = -np.inf * np.ones(pose_size)
-    for m in self._ref_motions:
-      curr_frames = m.get_frames()
-      curr_low = np.min(curr_frames, axis=0)
-      curr_high = np.max(curr_frames, axis=0)
-      low = np.minimum(low, curr_low)
-      high = np.maximum(high, curr_high)
-
-    motion = self.get_active_motion()
-    motion.set_frame_root_pos(-pos_bound, low)
-    motion.set_frame_root_pos(pos_bound, high)
-    motion.set_frame_root_rot(-rot_bound, low)
-    motion.set_frame_root_rot(rot_bound, high)
-
-    num_tar_frames = self.get_num_tar_frames()
-    low = np.concatenate([low] * num_tar_frames, axis=-1)
-    high = np.concatenate([high] * num_tar_frames, axis=-1)
+    low = [-3, -3, -3, -3, -3, -3]
+    high = [3, 3, 3, 3, 3, 3]
 
     return low, high
 
-  def set_ref_state_init_prob(self, prob):
-    self._ref_state_init_prob = prob
-    return
+  # def get_target_obs_bounds(self):
+  #   """Get bounds for target observations.
+
+  #   Returns:
+  #     low: Array containing the minimum value for each target observation
+  #       features.
+  #     high: Array containing the maximum value for each target observation
+  #       features.
+  #   """
+  #   pos_bound = 2 * np.ones(motion_data.MotionData.POS_SIZE)
+  #   rot_bound = 1 * np.ones(motion_data.MotionData.ROT_SIZE)
+
+  #   pose_size = self.get_pose_size()
+  #   low = np.inf * np.ones(pose_size)
+  #   high = -np.inf * np.ones(pose_size)
+  #   for m in self._ref_motions:
+  #     curr_frames = m.get_frames()
+  #     curr_low = np.min(curr_frames, axis=0)
+  #     curr_high = np.max(curr_frames, axis=0)
+  #     low = np.minimum(low, curr_low)
+  #     high = np.maximum(high, curr_high)
+
+  #   motion = self.get_active_motion()
+  #   motion.set_frame_root_pos(-pos_bound, low)
+  #   motion.set_frame_root_pos(pos_bound, high)
+  #   motion.set_frame_root_rot(-rot_bound, low)
+  #   motion.set_frame_root_rot(rot_bound, high)
+
+  #   num_tar_frames = self.get_num_tar_frames()
+  #   low = np.concatenate([low] * num_tar_frames, axis=-1)
+  #   high = np.concatenate([high] * num_tar_frames, axis=-1)
+
+  #   return low, high
+
+  # def set_ref_state_init_prob(self, prob):
+  #   self._ref_state_init_prob = prob
+  #   return
 
   def reward(self, env):
     """Get the reward without side effects."""
@@ -710,7 +737,34 @@ class ImitationTask(object):
 
     self._prev_motion_phase = new_phase
 
-    return
+  # def _update_ref_motion(self):
+  #   """Updates the reference motion and synchronizes the state of the reference
+
+  #   model with the current motion frame.
+  #   """
+  #   time = self._get_motion_time()
+  #   change_clip = self._check_change_clip()
+
+  #   if change_clip:
+  #     new_motion_id = self._sample_ref_motion()
+  #     self._change_ref_motion(new_motion_id)
+  #     self._reset_clip_change_time()
+  #     self._motion_time_offset = self._sample_time_offset()
+
+  #   motion = self.get_active_motion()
+  #   new_phase = motion.calc_phase(time)
+
+  #   if (self._enable_cycle_sync and (new_phase < self._prev_motion_phase)) \
+  #       or change_clip:
+  #     self._sync_ref_origin(
+  #         sync_root_position=True, sync_root_rotation=change_clip)
+
+  #   self._update_ref_state()
+  #   self._update_ref_model()
+
+  #   self._prev_motion_phase = new_phase
+
+  #   return
 
   def _update_ref_state(self):
     """Calculates and stores the current reference pose and velocity."""
@@ -794,9 +848,12 @@ class ImitationTask(object):
       self._episode_start_time_offset = -time
 
     time += self._motion_time_offset
+    # print("self._motion_time_offset = ", self._motion_time_offset)
     time += self._episode_start_time_offset
+    # print("self._episode_start_time_offset = ", self._episode_start_time_offset)
 
     if self._curr_episode_warmup:
+      # print("warmup")
       # if warmup is enabled, then apply a time offset to give the robot more
       # time to move to the reference motion
       time -= self._warmup_time
@@ -984,6 +1041,7 @@ class ImitationTask(object):
       sync_root_rotation: boolean indicating if the root rotation should be
         synchronized
     """
+    print("_sync_ref_origin")
     time = self._get_motion_time()
     motion = self.get_active_motion()
     ref_pose = self._calc_ref_pose(time, apply_origin_offset=False)
