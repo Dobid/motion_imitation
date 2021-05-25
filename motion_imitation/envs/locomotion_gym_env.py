@@ -352,12 +352,17 @@ class LocomotionGymEnv(gym.Env):
       if time_to_sleep > 0:
         time.sleep(time_to_sleep)
       base_pos = self._robot.GetBasePosition()
+      ref_pos = self._task._get_ref_base_position()
 
       # Also keep the previous orientation of the camera set by the user.
       [yaw, pitch,
        dist] = self._pybullet_client.getDebugVisualizerCamera()[8:11]
-      self._pybullet_client.resetDebugVisualizerCamera(dist, yaw, pitch,
-                                                       base_pos)
+      if self._task._enable_cycle_sync:
+        self._pybullet_client.resetDebugVisualizerCamera(dist, yaw, pitch,
+                                                        base_pos)
+      else:
+        self._pybullet_client.resetDebugVisualizerCamera(dist, yaw, pitch, ref_pos)
+
       self._pybullet_client.configureDebugVisualizer(
           self._pybullet_client.COV_ENABLE_SINGLE_STEP_RENDERING, 1)
       alpha = 1.
@@ -396,6 +401,7 @@ class LocomotionGymEnv(gym.Env):
     return self._get_observation(), reward, done, {}
 
   def render(self, mode='rgb_array'):
+    print("render function")
     if mode != 'rgb_array':
       raise ValueError('Unsupported render mode:{}'.format(mode))
     base_pos = self._robot.GetBasePosition()

@@ -61,7 +61,6 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
   timesteps_per_actorbatch = int(np.ceil(float(timesteps_per_actorbatch) / num_procs))
   optim_batchsize = int(np.ceil(float(optim_batchsize) / num_procs))
 
-  print("building model")
   model = ppo_imitation.PPOImitation(
                policy=imitation_policies.ImitationPolicy,
                env=env,
@@ -101,7 +100,7 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
 
   return
 
-def test(model, env, num_procs, only_reference=False, num_episodes=None):
+def test(model, env, num_procs, sync_ref, num_episodes=None):
   curr_return = 0
   sum_return = 0
   episode_count = 0
@@ -118,9 +117,10 @@ def test(model, env, num_procs, only_reference=False, num_episodes=None):
     curr_return += r
 
     if done:
+      if sync_ref:
         o = env.reset()
-        sum_return += curr_return
-        episode_count += 1
+      sum_return += curr_return
+      episode_count += 1
 
   sum_return = MPI.COMM_WORLD.allreduce(sum_return, MPI.SUM)
   episode_count = MPI.COMM_WORLD.allreduce(episode_count, MPI.SUM)
@@ -144,18 +144,19 @@ def main():
   arg_parser.add_argument("--model_file", dest="model_file", type=str, default="")
   arg_parser.add_argument("--total_timesteps", dest="total_timesteps", type=int, default=2e8)
   arg_parser.add_argument("--int_save_freq", dest="int_save_freq", type=int, default=0) # save intermediate model every n policy steps
-  arg_parser.add_argument("--only_reference", dest="only_reference", type=bool, default=False)
+  arg_parser.add_argument("--sync_reference", dest="sync_reference", action="store_true", default=False)
 
   args = arg_parser.parse_args()
   
   num_procs = MPI.COMM_WORLD.Get_size()
   os.environ["CUDA_VISIBLE_DEVICES"] = '-1'
-  
+
   enable_env_rand = ENABLE_ENV_RANDOMIZER and (args.mode != "test")
   env = env_builder.build_imitation_env(motion_files=[args.motion_file],
                                         num_parallel_envs=num_procs,
                                         mode=args.mode,
                                         enable_randomizer=enable_env_rand,
+                                        arg_enable_cycle_sync=args.sync_reference,
                                         enable_rendering=args.visualize)
   
     
@@ -183,7 +184,8 @@ def main():
       test(model=model,
            env=env,
            num_procs=num_procs,
-           num_episodes=args.num_test_episodes)
+           num_episodes=args.num_test_episodes,
+           sync_ref=args.sync_reference)
   else:
       assert False, "Unsupported mode: " + args.mode
   # Use this in the terminal to start the tensorboard server  
