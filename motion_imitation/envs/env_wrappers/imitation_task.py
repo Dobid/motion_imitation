@@ -1041,7 +1041,6 @@ class ImitationTask(object):
       sync_root_rotation: boolean indicating if the root rotation should be
         synchronized
     """
-    print("_sync_ref_origin")
     time = self._get_motion_time()
     motion = self.get_active_motion()
     ref_pose = self._calc_ref_pose(time, apply_origin_offset=False)

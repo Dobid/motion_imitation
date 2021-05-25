@@ -77,7 +77,7 @@ def build_laikago_env( motor_control_mode, enable_rendering):
 
 
 def build_imitation_env(motion_files, num_parallel_envs, mode,
-                        enable_randomizer, enable_rendering,
+                        enable_randomizer, enable_rendering, arg_enable_cycle_sync,
                         robot_class=laikago.Laikago,
                         trajectory_generator=simple_openloop.LaikagoPoseOffsetGenerator(action_limit=laikago.UPPER_BOUND)):
   assert len(motion_files) > 0
@@ -99,7 +99,7 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   ]
 
   task = imitation_task.ImitationTask(ref_motion_filenames=motion_files,
-                                      enable_cycle_sync=True,
+                                      enable_cycle_sync=arg_enable_cycle_sync,
                                       tar_frame_steps=[1, 2, 10, 30],
                                       ref_state_init_prob=0.9,
                                       warmup_time=0.25)
