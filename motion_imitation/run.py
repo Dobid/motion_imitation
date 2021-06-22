@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import pos
 import os
 import inspect
 from motion_imitation.utilities.debug_logger import logd
@@ -27,6 +28,8 @@ import os
 import random
 import tensorflow as tf
 import time
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 from motion_imitation.envs import env_builder as env_builder
 from motion_imitation.learning import imitation_policies as imitation_policies
@@ -35,7 +38,7 @@ from motion_imitation.learning import ppo_imitation as ppo_imitation
 from stable_baselines.common.callbacks import CheckpointCallback
 
 TIMESTEPS_PER_ACTORBATCH = 4096
-OPTIM_BATCHSIZE = 256
+OPTIM_BATCHSIZE = 32
 
 ENABLE_ENV_RANDOMIZER = True
 
@@ -95,7 +98,7 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
       int_dir = os.path.join(output_dir, "intermedate")
       callbacks.append(CheckpointCallback(save_freq=int_save_freq, save_path=int_dir,
                                           name_prefix='model'))
-
+  print("TOTAL TIMESTEPS = ", total_timesteps)
   model.learn(total_timesteps=total_timesteps, save_path=save_path, callback=callbacks)
 
   return
@@ -111,12 +114,17 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
     num_local_episodes = np.inf
 
   o = env.reset()
+  cmd = []
   while episode_count < num_local_episodes:
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
+    # print("cmd_vel = ", o[-6:])
+    cmd.append(o[-6:])
     curr_return += r
 
     if done:
+      cmd = np.array(cmd)
+      plot_graphs(cmd)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return
@@ -133,7 +141,33 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
   return
 
+def plot_graphs(cmd):
+  # X = np.linspace(0,39,39)
+  cmd = np.transpose(cmd)
+  fig, (ax1, ax2) = plt.subplots(2)
+  X = np.linspace(0,cmd.shape[1],cmd.shape[1])
+  labels = ['x_lin_vel', 'y_lin_vel', 'z_lin_vel', 'roll_vel', 'pitch_vel', 'yaw_vel']
+
+  y_lin_vel = cmd[1]
+  avg_y_vel = np.mean(y_lin_vel)
+  ax1.plot(X, y_lin_vel)
+  y_lin_vel = y_lin_vel - avg_y_vel
+
+  pos_y = [0]
+  for vel in y_lin_vel:
+    pos_y.append(pos_y[-1]+vel*0.033)
+  del pos_y[0]
+  ax2.plot(X, pos_y)
+
+  # for y, label in zip(plot_cmd, labels):
+  #   plt.plot(X, y, label=label)
+  plt.legend()
+  plt.show()
+
+  print("AVG_Y_VEL = ", avg_y_vel)
+
 def main():
+  # Parsing arguments from the python command
   arg_parser = argparse.ArgumentParser()
   arg_parser.add_argument("--seed", dest="seed", type=int, default=None)
   arg_parser.add_argument("--mode", dest="mode", type=str, default="train")
@@ -148,19 +182,24 @@ def main():
 
   args = arg_parser.parse_args()
   
+  # get number of CPUs to use from the mpiexec cmd
   num_procs = MPI.COMM_WORLD.Get_size()
+  
+  # doesn't use GPU computing
   os.environ["CUDA_VISIBLE_DEVICES"] = '-1'
 
+  # enable environnement (simulation) randomizer
   enable_env_rand = ENABLE_ENV_RANDOMIZER and (args.mode != "test")
+
+  # building custom gym env
   env = env_builder.build_imitation_env(motion_files=[args.motion_file],
                                         num_parallel_envs=num_procs,
                                         mode=args.mode,
                                         enable_randomizer=enable_env_rand,
                                         arg_enable_cycle_sync=args.sync_reference,
                                         enable_rendering=args.visualize)
-  
-    
-  if args.model_file != "":
+
+  if args.model_file != "": # 
     print("loading model from provided model file")
     # model.load_parameters(args.model_file)
     # model.load(load_path=args.model_file, env=env)

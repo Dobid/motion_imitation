@@ -1,0 +1,44 @@
+name: motion_imi
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - ca-certificates=2021.5.25=h06a4308_1
+  - certifi=2020.12.5=py37h06a4308_0
+  - ld_impl_linux-64=2.33.1=h53a641e_7
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - ncurses=6.2=he6710b0_1
+  - openssl=1.1.1k=h27cfd23_0
+  - pcre=8.44=he6710b0_0
+  - pip=21.1.1=py37h06a4308_0
+  - python=3.7.10=hdb3f193_0
+  - readline=8.1=h27cfd23_0
+  - setuptools=52.0.0=py37h06a4308_0
+  - sqlite=3.35.4=hdfb4753_0
+  - swig=4.0.2=h2531618_3
+  - tk=8.6.10=hbc83047_0
+  - wheel=0.36.2=pyhd3eb1b0_0
+  - xz=5.2.5=h7b6447c_0
+  - zlib=1.2.11=h7b6447c_3
+  - pip:
+    - atari-py==0.2.6
+    - autopep8==1.5.6
+    - box2d-py==2.3.8
+    - cython==0.29.22
+    - gast==0.2.2
+    - inputs==0.5
+    - llvmlite==0.36.0
+    - numba==0.53.1
+    - opt-einsum==3.3.0
+    - pathlib==1.0.1
+    - pybullet==3.1.0
+    - pycodestyle==2.7.0
+    - quadprog==0.1.8
+    - tensorboard==1.15.0
+    - tensorflow==1.15.4
+    - tensorflow-estimator==1.15.1
+    - toml==0.10.2
+    - tqdm==4.59.0
+prefix: /home/sur/miniconda3/envs/motion_imi

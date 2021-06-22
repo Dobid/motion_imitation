@@ -114,6 +114,7 @@ class ImitationWrapperEnv(object):
       observations from the reference motion.
     """
     target_observation = self._task.build_target_obs()
+    # print("CMD_VEL = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
 
@@ -135,7 +136,6 @@ class ImitationWrapperEnv(object):
     high = np.concatenate([high0, task_high], axis=-1)
 
     obs_space = gym.spaces.Box(low, high)
-    logd.info("obs_space = %s", obs_space)
     return obs_space
 
   def _enable_curriculum(self):

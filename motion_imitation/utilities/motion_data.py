@@ -681,7 +681,6 @@ class MotionData(object):
     # replicate the velocity at the last frame
     if num_frames > 1:
       frame_vels[-1, :] = frame_vels[-2, :]
-
     return frame_vels
 
   def calc_blend_idx(self, time):

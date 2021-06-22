@@ -35,6 +35,7 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 from motion_imitation.utilities.debug_logger import logd
+from time import sleep
 
 
 class ImitationTask(object):
@@ -267,10 +268,9 @@ class ImitationTask(object):
     Returns:
       An array containing the velocity of the body/root of the robot
     """
-
     time0 = self._get_motion_time()
     basevel_lin_ang = self._calc_ref_vel(time0)[0:6]
-    # print("vel = ", basevel_lin_ang)
+    # print("vel = ", basevel_lin_ang[3:6])
 
     return basevel_lin_ang
 
@@ -381,12 +381,21 @@ class ImitationTask(object):
     end_effector_reward = self._calc_reward_end_effector()
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
+    
+    "reward function de base"
+    # reward = self._pose_weight * pose_reward \
+    #          + self._velocity_weight * velocity_reward \
+    #          + self._end_effector_weight * end_effector_reward \
+    #          + self._root_pose_weight * root_pose_reward \
+    #          + self._root_velocity_weight * root_velocity_reward
 
-    reward = self._pose_weight * pose_reward \
-             + self._velocity_weight * velocity_reward \
-             + self._end_effector_weight * end_effector_reward \
-             + self._root_pose_weight * root_pose_reward \
-             + self._root_velocity_weight * root_velocity_reward
+    "reward function inversée"
+    reward = 0.05 * pose_reward \
+             + 0.05 * velocity_reward \
+             + 0.1 * end_effector_reward \
+             + 0.6 * root_pose_reward \
+             + 0.2 * root_velocity_reward
+
 
     return reward * self._weight
 
@@ -477,6 +486,8 @@ class ImitationTask(object):
       if (is_end_eff):
         end_state_ref = pyb.getLinkState(ref_model, j)
         end_state_sim = pyb.getLinkState(sim_model, j)
+        # print("end_state_ref = ", end_state_ref)
+        # print("end_state_sim = ", end_state_sim)
         end_pos_ref = np.array(end_state_ref[0])
         end_pos_sim = np.array(end_state_sim[0])
 
@@ -764,7 +775,7 @@ class ImitationTask(object):
 
   #   self._prev_motion_phase = new_phase
 
-  #   return
+    return
 
   def _update_ref_state(self):
     """Calculates and stores the current reference pose and velocity."""
@@ -983,6 +994,8 @@ class ImitationTask(object):
 
     root_vel = motion.get_frame_root_vel(vel)
     root_ang_vel = motion.get_frame_root_ang_vel(vel)
+    # print("ROOT_ANG_VEL = ", root_ang_vel)
+    # sleep(0.5)
 
     root_vel = pose3d.QuaternionRotatePoint(root_vel, self._origin_offset_rot)
     root_ang_vel = pose3d.QuaternionRotatePoint(root_ang_vel,
