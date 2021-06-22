@@ -1,1 +1,1 @@
-mpiexec -n 7 python3 motion_imitation/run.py --mode train --motion_file motion_imitation/data/motions/dog_pace.txt --int_save_freq 10000000
+mpiexec -n 7 python3 motion_imitation/run.py --mode train --motion_file motion_imitation/data/motions/dog_pace.txt --model_file ../model_saves/cmd_vel_200+300M.zip --int_save_freq 10000000 --sync_reference --total_timesteps 2000000000
