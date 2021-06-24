@@ -75,7 +75,7 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
                optim_batchsize=optim_batchsize,
                lam=0.95,
                adam_epsilon=1e-5,
-               schedule='constant',
+               schedule='constant', #Change to linear
                policy_kwargs=policy_kwargs,
                tensorboard_log=output_dir,
                verbose=1)
@@ -114,17 +114,17 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
     num_local_episodes = np.inf
 
   o = env.reset()
-  cmd = []
+  # cmd = []
   while episode_count < num_local_episodes:
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
     # print("cmd_vel = ", o[-6:])
-    cmd.append(o[-6:])
+    # cmd.append(o[-6:])
     curr_return += r
 
     if done:
-      cmd = np.array(cmd)
-      plot_graphs(cmd)
+      # cmd = np.array(cmd)
+      # plot_graphs(cmd)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return

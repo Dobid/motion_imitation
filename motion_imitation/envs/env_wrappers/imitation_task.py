@@ -263,16 +263,24 @@ class ImitationTask(object):
     return self._ref_motions[self._active_motion_id]
 
   def build_target_obs(self):
-    """Constructs the target observations, consisting of linear and angular velocities of the body/root of the robot
+    """Constructs the target observations (eg. command), consisting of linear and angular velocities of the body/root of the robot
 
     Returns:
       An array containing the velocity of the body/root of the robot
     """
     time0 = self._get_motion_time()
-    basevel_lin_ang = self._calc_ref_vel(time0)[0:6]
-    # print("vel = ", basevel_lin_ang[3:6])
+    """ compute cmd vel from reference motion txt file """
+    root_cmd_vel = self._calc_ref_vel(time0)[0:6]
 
-    return basevel_lin_ang
+    """ setting custom velocity command """
+    # root_cmd_vel = np.array([0, 2, 0, 0, 0, 0])
+
+    # motion_ref_vrpy = self._calc_ref_vel(time0)[3:6]
+    # print("motio_ref_vrpy", motion_ref_vrpy)
+    # root_cmd_vel = np.concatenate((np.array([0,2,0]), motion_ref_vrpy))
+    # print("vel = ", root_cmd_vel)
+
+    return root_cmd_vel
 
   # def build_target_obs(self):
   #   """Constructs the target observations, consisting of a sequence of
@@ -375,26 +383,25 @@ class ImitationTask(object):
   def reward(self, env):
     """Get the reward without side effects."""
     del env
-
     pose_reward = self._calc_reward_pose()
     velocity_reward = self._calc_reward_velocity()
     end_effector_reward = self._calc_reward_end_effector()
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
     
-    "reward function de base"
-    # reward = self._pose_weight * pose_reward \
-    #          + self._velocity_weight * velocity_reward \
-    #          + self._end_effector_weight * end_effector_reward \
-    #          + self._root_pose_weight * root_pose_reward \
-    #          + self._root_velocity_weight * root_velocity_reward
+    """reward function de base"""
+    reward = self._pose_weight * pose_reward \
+             + self._velocity_weight * velocity_reward \
+             + self._end_effector_weight * end_effector_reward \
+             + self._root_pose_weight * root_pose_reward \
+             + self._root_velocity_weight * root_velocity_reward
 
-    "reward function inversée"
-    reward = 0.05 * pose_reward \
-             + 0.05 * velocity_reward \
-             + 0.1 * end_effector_reward \
-             + 0.6 * root_pose_reward \
-             + 0.2 * root_velocity_reward
+    """reward function inversée"""
+    # reward = 0.05 * pose_reward \
+    #          + 0.05 * velocity_reward \
+    #          + 0.1 * end_effector_reward \
+    #          + 0.6 * root_pose_reward \
+    #          + 0.2 * root_velocity_reward
 
 
     return reward * self._weight
