@@ -493,8 +493,6 @@ class ImitationTask(object):
       if (is_end_eff):
         end_state_ref = pyb.getLinkState(ref_model, j)
         end_state_sim = pyb.getLinkState(sim_model, j)
-        # print("end_state_ref = ", end_state_ref)
-        # print("end_state_sim = ", end_state_sim)
         end_pos_ref = np.array(end_state_ref[0])
         end_pos_sim = np.array(end_state_sim[0])
 
@@ -508,6 +506,8 @@ class ImitationTask(object):
 
         rel_end_pos_diff = rel_end_pos_ref - rel_end_pos_sim
         end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
+        # print("end_pos_ref j = ", j, " ", end_pos_ref)
+        # print("rel_end_pos_ref j = ", j, " ", rel_end_pos_ref)
 
         end_pos_err = (
             rel_end_pos_diff[0] * rel_end_pos_diff[0] +
@@ -654,7 +654,6 @@ class ImitationTask(object):
       pyb = self._get_pybullet_client()
       j_info = pyb.getJointInfo(self._ref_model, j)
       j_state = pyb.getJointStateMultiDof(self._ref_model, j)
-
       j_pose_idx = j_info[3]
       j_vel_idx = j_info[4]
       j_pose_size = len(j_state[0])
@@ -979,6 +978,7 @@ class ImitationTask(object):
 
       motion.set_frame_root_rot(root_rot, pose)
       motion.set_frame_root_pos(root_pos, pose)
+      # print("************* POSE = ", pose, "*******************")
 
     return pose
 
@@ -1315,7 +1315,6 @@ class ImitationTask(object):
     root_pos = self._env.robot.GetDefaultInitPosition()
     root_rot = self._env.robot.GetDefaultInitOrientation()
     joint_pose = self._env.robot.GetDefaultInitJointPose()
-
     pose = np.concatenate([root_pos, root_rot, joint_pose])
 
     return pose
