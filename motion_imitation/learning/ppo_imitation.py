@@ -383,7 +383,7 @@ class PPOImitation(pposgd_simple.PPO1):
                     current_it_timesteps = MPI.COMM_WORLD.allreduce(seg["total_timestep"])
                     timesteps_so_far += current_it_timesteps
                     self.num_timesteps += current_it_timesteps
-                    print("save_iters = ", save_iters)
+                    # print("save_iters = ", save_iters)
                     if is_root and (save_path is not None) and (iters_so_far % save_iters == 0):
                       self.save(save_path)
 

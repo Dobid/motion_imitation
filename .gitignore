@@ -1,3 +1,6 @@
 build/
 __pycache__/
 output/
+slurm_scripts/slurm_*
+slurm_scripts/xport=ALL
+tensorboard_out/
