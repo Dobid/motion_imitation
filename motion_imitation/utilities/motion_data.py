@@ -104,6 +104,9 @@ class MotionData(object):
         self._enable_cycle_offset_rot = False
 
       self._frames = np.array(motion_json[self._FRAMES_KEY])
+      # self._frames[...,2] += 0.10673067 + 0.035
+      # self._frames[...,2] += 0.15
+      self._frames[...,2] += 0.05
       self._postprocess_frames(self._frames)
 
       self._frame_vels = self._calc_frame_vels()

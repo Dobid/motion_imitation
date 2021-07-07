@@ -116,9 +116,10 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
   o = env.reset()
   # cmd = []
   while episode_count < num_local_episodes:
+    # input("press enter for steping the env")
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
-    # print("cmd_vel = ", o[-6:])
+    print("cmd_vel = ", o[-6:])
     # cmd.append(o[-6:])
     curr_return += r
 
