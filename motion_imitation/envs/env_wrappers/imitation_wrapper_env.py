@@ -151,4 +151,5 @@ class ImitationWrapperEnv(object):
     new_steps = int((1.0 - t) * self._episode_length_start +
                        t * self._episode_length_end)
     self._max_episode_steps = new_steps
+    # print("max_episode_steps = ", self._max_episode_steps)
     return

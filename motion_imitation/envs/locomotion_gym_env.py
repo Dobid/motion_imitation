@@ -315,6 +315,7 @@ class LocomotionGymEnv(gym.Env):
     # Loop over all env randomizers.
     for env_randomizer in self._env_randomizers:
       env_randomizer.randomize_env(self)
+    # input("press enter to continue")
 
     return self._get_observation()
 

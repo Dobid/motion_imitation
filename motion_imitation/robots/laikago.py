@@ -158,6 +158,7 @@ class Laikago(minitaur.Minitaur):
       enable_action_interpolation=True,
       enable_action_filter=False,
       reset_time=-1,
+      # reset_time=1,
       allow_knee_contact=False,
   ):
     self._urdf_filename = urdf_filename
@@ -347,6 +348,7 @@ class Laikago(minitaur.Minitaur):
 
   def GetDefaultInitJointPose(self):
     """Get default initial joint pose."""
+    print("GET DEFAULT INIT JOINT POSE")
     joint_pose = (INIT_MOTOR_ANGLES + JOINT_OFFSETS) * JOINT_DIRECTIONS
     return joint_pose
 
