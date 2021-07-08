@@ -536,7 +536,6 @@ class ImitationTask(object):
     root_rot_diff_angle = motion_util.normalize_rotation_angle(
         root_rot_diff_angle)
     root_rot_err = root_rot_diff_angle * root_rot_diff_angle
-    print(root_rot_diff_angle)
 
     root_pose_err = root_pos_err + 0.5 * root_rot_err
     root_pose_reward = np.exp(-self._root_pose_err_scale * root_pose_err)
