@@ -115,7 +115,7 @@ class ImitationWrapperEnv(object):
     # noise = np.random.uniform(-1,1,6) * np.array([0.1, 0.1, 0.1, 0.0872, 0.0872, 0.0872])
     noise = np.random.uniform(-1,1,6) * np.array([0.2, 0.2, 0.2, 0.1744, 0.1744, 0.1744])
     # target_observation = np.array([1, 1, 1, 1, 1, 1]) + noise
-    target_observation = self._task.build_target_obs()
+    target_observation = self._task.build_target_obs() + noise
     # print("CMD_VEL = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
