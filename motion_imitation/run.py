@@ -119,7 +119,7 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
     # input("press enter for steping the env")
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
-    print("cmd_vel = ", o[-6:])
+    # print("cmd_vel = ", o[-6:])
     # cmd.append(o[-6:])
     curr_return += r
 
@@ -143,25 +143,25 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
   return
 
 def plot_graphs(cmd):
-  # X = np.linspace(0,39,39)
+  # X = np.linspace(0,1800,1800)
   cmd = np.transpose(cmd)
-  fig, (ax1, ax2) = plt.subplots(2)
+  # fig, (ax1, ax2) = plt.subplots(2)
   X = np.linspace(0,cmd.shape[1],cmd.shape[1])
   labels = ['x_lin_vel', 'y_lin_vel', 'z_lin_vel', 'roll_vel', 'pitch_vel', 'yaw_vel']
 
-  y_lin_vel = cmd[1]
-  avg_y_vel = np.mean(y_lin_vel)
-  ax1.plot(X, y_lin_vel)
-  y_lin_vel = y_lin_vel - avg_y_vel
+  # y_lin_vel = cmd[1]
+  # avg_y_vel = np.mean(y_lin_vel)
+  # ax1.plot(X, y_lin_vel)
+  # y_lin_vel = y_lin_vel - avg_y_vel
 
-  pos_y = [0]
-  for vel in y_lin_vel:
-    pos_y.append(pos_y[-1]+vel*0.033)
-  del pos_y[0]
-  ax2.plot(X, pos_y)
+  # pos_y = [0]
+  # for vel in y_lin_vel:
+  #   pos_y.append(pos_y[-1]+vel*0.033)
+  # del pos_y[0]
+  # ax2.plot(X, pos_y)
 
-  # for y, label in zip(plot_cmd, labels):
-  #   plt.plot(X, y, label=label)
+  for y, label in zip(cmd, labels):
+    plt.plot(X, y, label=label)
   plt.legend()
   plt.show()
 
