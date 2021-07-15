@@ -94,7 +94,8 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
 
   sensors = [
       sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=laikago.NUM_MOTORS), num_history=3),
-      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.IMUSensor(), num_history=3),
+      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.IMUSensor(['R', 'P', 'Y', 'dR', 'dP', 'dY']), num_history=3), # added yaw and dYaw in IMU.
+    #   sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.IMUSensor(), num_history=3), # added yaw and dYaw in IMU.
       sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=environment_sensors.LastActionSensor(num_actions=laikago.NUM_MOTORS), num_history=3)
   ]
 
