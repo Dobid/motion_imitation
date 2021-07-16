@@ -278,15 +278,15 @@ class LocomotionGymEnv(gym.Env):
       #                        basePosition = [3,0,-0.1],baseOrientation=[0.0,0.1,0.0,-1]) # making a ramp
       
       # making stairs (4 steps)
-      sth = 0.04 #step height (base value = 0.25)
-      stair1=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
-                              basePosition = [2.75,0,-0.2+1*sth],baseOrientation=[0.0,0.0,0.0,1])
-      stair2=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
-                              basePosition = [2.75+0.33,0,-0.2+2*sth],baseOrientation=[0.0,0.0,0.0,1])
-      stair3=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
-                              basePosition = [2.75+0.66,0,-0.2+3*sth],baseOrientation=[0.0,0.0,0.0,1])
-      stair4=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
-                              basePosition = [2.75+0.99,0,-0.2+4*sth],baseOrientation=[0.0,0.0,0.0,1])
+      # sth = 0.04 #step height (base value = 0.25)
+      # stair1=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
+      #                         basePosition = [2.75,0,-0.2+1*sth],baseOrientation=[0.0,0.0,0.0,1])
+      # stair2=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
+      #                         basePosition = [2.75+0.33,0,-0.2+2*sth],baseOrientation=[0.0,0.0,0.0,1])
+      # stair3=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
+      #                         basePosition = [2.75+0.66,0,-0.2+3*sth],baseOrientation=[0.0,0.0,0.0,1])
+      # stair4=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
+      #                         basePosition = [2.75+0.99,0,-0.2+4*sth],baseOrientation=[0.0,0.0,0.0,1])
 
       self._world_dict = {
           "ground": self._pybullet_client.loadURDF("plane_implicit.urdf")
