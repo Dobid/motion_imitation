@@ -125,7 +125,12 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
     if done:
       # cmd = np.array(cmd)
-      # plot_graphs(cmd)
+      robot_positions = np.array(env._robot_positions)
+      ref_positions = np.array(env._ref_positions)
+      X = robot_positions[:,0]
+      y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
+      # plot_graphs(X,y_pos)
+      # plt.plot(robot_positions[:,0], robot_positions[:,1])
       if sync_ref:
         o = env.reset()
       sum_return += curr_return
@@ -142,30 +147,39 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
   return
 
-def plot_graphs(cmd):
-  # X = np.linspace(0,1800,1800)
-  cmd = np.transpose(cmd)
-  # fig, (ax1, ax2) = plt.subplots(2)
-  X = np.linspace(0,cmd.shape[1],cmd.shape[1])
-  labels = ['x_lin_vel', 'y_lin_vel', 'z_lin_vel', 'roll_vel', 'pitch_vel', 'yaw_vel']
-
-  # y_lin_vel = cmd[1]
-  # avg_y_vel = np.mean(y_lin_vel)
-  # ax1.plot(X, y_lin_vel)
-  # y_lin_vel = y_lin_vel - avg_y_vel
-
-  # pos_y = [0]
-  # for vel in y_lin_vel:
-  #   pos_y.append(pos_y[-1]+vel*0.033)
-  # del pos_y[0]
-  # ax2.plot(X, pos_y)
-
-  for y, label in zip(cmd, labels):
+def plot_graphs(X,y_pos):
+  y_pos = np.transpose(y_pos)
+  labels = ['trajectoire robot', 'trajectoire reference']
+  for y, label in zip(y_pos, labels):
     plt.plot(X, y, label=label)
+  # plt.ylim(-1,1)
   plt.legend()
   plt.show()
 
-  print("AVG_Y_VEL = ", avg_y_vel)
+# def plot_graphs(cmd):
+#   # X = np.linspace(0,1800,1800)
+#   cmd = np.transpose(cmd)
+#   # fig, (ax1, ax2) = plt.subplots(2)
+#   X = np.linspace(0,cmd.shape[1],cmd.shape[1])
+#   labels = ['x_lin_vel', 'y_lin_vel', 'z_lin_vel', 'roll_vel', 'pitch_vel', 'yaw_vel']
+
+#   # y_lin_vel = cmd[1]
+#   # avg_y_vel = np.mean(y_lin_vel)
+#   # ax1.plot(X, y_lin_vel)
+#   # y_lin_vel = y_lin_vel - avg_y_vel
+
+#   # pos_y = [0]
+#   # for vel in y_lin_vel:
+#   #   pos_y.append(pos_y[-1]+vel*0.033)
+#   # del pos_y[0]
+#   # ax2.plot(X, pos_y)
+
+#   for y, label in zip(cmd, labels):
+#     plt.plot(X, y, label=label)
+#   plt.legend()
+#   plt.show()
+
+  # print("AVG_Y_VEL = ", avg_y_vel)
 
 def main():
   # Parsing arguments from the python command

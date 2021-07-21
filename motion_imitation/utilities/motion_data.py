@@ -109,8 +109,9 @@ class MotionData(object):
       # self._frames[...,2] += 0.10673067 + 0.035
       # self._frames[...,2] += 0.15
       self._frames[...,2] += 0.05
-      self._postprocess_frames(self._frames * [1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1] + [0,0,0,0.9239,0,0,0.3827,0,0,0,0,0,0,0,0,0,0,0,0])
-      print("FRAMES = ", self._frames)
+      # self._frames *= [0,0,1,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0] 
+      # self._frames += [0,0,0, 0.14758, 0.69150, 0.69157, 0.14758,0,0,0,0,0,0,0,0,0,0,0,0]
+      self._postprocess_frames(self._frames)
 
       self._frame_vels = self._calc_frame_vels()
 
