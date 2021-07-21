@@ -103,7 +103,8 @@ class ImitationWrapperEnv(object):
     return observation
   
   def _modify_observation(self, original_observation):
-    """Appends target observations from the reference motion to the observations.
+    """Appends target observations from the reference motion to the observations. Adds noise to command
+      to avoid neural network overfitting.
 
     Args:
       original_observation: A numpy array containing the original observations.
@@ -112,9 +113,9 @@ class ImitationWrapperEnv(object):
       A numpy array contains the initial original concatenated with target
       observations from the reference motion.
     """
-    # noise = np.random.uniform(-1,1,6) * np.array([0.1, 0.1, 0.1, 0.0872, 0.0872, 0.0872])
     noise = np.random.uniform(-1,1,6) * np.array([0.2, 0.2, 0.2, 0.1744, 0.1744, 0.1744])
-    target_observation = self._task.build_target_obs() + noise
+    # target_observation = self._task.build_target_obs() + noise
+    target_observation = self._task.build_target_obs()
     # print("CMD_VEL = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation

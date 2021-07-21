@@ -144,6 +144,8 @@ class LocomotionGymEnv(gym.Env):
     self.observation_space = (
         space_utils.convert_sensors_to_gym_space_dictionary(
             self.all_sensors()))
+    self._robot_positions = []
+    self._ref_positions= []
 
   def _build_action_space(self):
     """Builds action space based on motor control mode."""
@@ -176,9 +178,6 @@ class LocomotionGymEnv(gym.Env):
       self.action_space = spaces.Box(np.array(action_lower_bound),
                                      np.array(action_upper_bound),
                                      dtype=np.float32)
-      # logd.info("self.action_space = %s", self.action_space)
-      # logd.info("self.action_space.low = %s", self.action_space.low)
-      # logd.info("self.action_space.high = %s", self.action_space.high)
 
   def close(self):
     if hasattr(self, '_robot') and self._robot:
@@ -277,7 +276,7 @@ class LocomotionGymEnv(gym.Env):
       # ramp=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
       #                        basePosition = [3,0,-0.1],baseOrientation=[0.0,0.1,0.0,-1]) # making a ramp
       
-      # making stairs (4 steps)
+      """making stairs (4 steps)"""
       # sth = 0.04 #step height (base value = 0.25)
       # stair1=self._pybullet_client.createMultiBody(baseMass=0,baseCollisionShapeIndex = sh_colBox,
       #                         basePosition = [2.75,0,-0.2+1*sth],baseOrientation=[0.0,0.0,0.0,1])
@@ -376,6 +375,8 @@ class LocomotionGymEnv(gym.Env):
         time.sleep(time_to_sleep)
       base_pos = self._robot.GetBasePosition()
       ref_pos = self._task._get_ref_base_position()
+      self._robot_positions.append(base_pos)
+      self._ref_positions.append(ref_pos)
 
       # Also keep the previous orientation of the camera set by the user.
       [yaw, pitch,

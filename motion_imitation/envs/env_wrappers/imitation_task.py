@@ -605,7 +605,7 @@ class ImitationTask(object):
 
     pyb = self._get_pybullet_client()
     urdf_file = self._env.robot.GetURDFFile()
-    ref_model = pyb.loadURDF(urdf_file, useFixedBase=True)
+    ref_model = pyb.loadURDF(urdf_file, useFixedBase=False)
 
     pyb.changeDynamics(ref_model, -1, linearDamping=0, angularDamping=0)
 
