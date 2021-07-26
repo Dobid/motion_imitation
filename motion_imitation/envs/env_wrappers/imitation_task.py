@@ -262,26 +262,35 @@ class ImitationTask(object):
     """
     return self._ref_motions[self._active_motion_id]
 
+  """ function with (vx, vy, vz, qx, qy, qz, qw) - linear velocity + quaternion as target obs"""
   def build_target_obs(self):
-    """Constructs the target observations (eg. command), consisting of linear and angular velocities of the body/root of the robot
 
-    Returns:
-      An array containing the velocity of the body/root of the robot
-    """
-    time0 = self._get_motion_time()
-    """ compute cmd vel from reference motion txt file """
-    root_cmd_vel = self._calc_ref_vel(time0)[0:6]
+    time = self._get_motion_time()
 
-    """ setting custom velocity command """
-    # root_cmd_vel = np.array([0, 2, 0, 0, 0, 0])
+    root_rot_pos = self._calc_ref_pose(time)[3:7]
+    # print("*********** pose = ", root_rot_pos)
+    root_vel_lin = self._calc_ref_vel(time)[0:3]
+    # print("*********** vel_lin = ", root_vel_lin)
+    command = np.concatenate([root_vel_lin, root_rot_pos], axis=-1)
+    return command
 
-    # motion_ref_vrpy = self._calc_ref_vel(time0)[3:6]
-    # print("motio_ref_vrpy", motion_ref_vrpy)
-    # root_cmd_vel = np.concatenate((np.array([0,2,0]), motion_ref_vrpy))
-    # print("vel = ", root_cmd_vel)
+  """ function with (vx, vy, vz, vr, vp, vy) - velocity command as target obs"""
+  # def build_target_obs(self):
+  #   """Constructs the target observations (eg. command), consisting of linear and angular velocities of the body/root of the robot
 
-    return root_cmd_vel
+  #   Returns:
+  #     An array containing the velocity of the body/root of the robot
+  #   """
+  #   time0 = self._get_motion_time()
+  #   """ compute cmd vel from reference motion txt file """
+  #   root_cmd_vel = self._calc_ref_vel(time0)[0:6]
 
+  #   """ setting custom velocity command """
+  #   # root_cmd_vel = np.array([0, 2, 0, 0, 0, 0])
+
+  #   return root_cmd_vel
+
+  """ original function """
   # def build_target_obs(self):
   #   """Constructs the target observations, consisting of a sequence of
 
@@ -328,6 +337,7 @@ class ImitationTask(object):
 
   #   return tar_obs
 
+  """ function for linear velocity + rotation quaternion position as command """
   def get_target_obs_bounds(self):
     """Get bounds for target observations.
 
@@ -337,11 +347,27 @@ class ImitationTask(object):
       high: Array containing the maximum value for each target observation
         features.
     """
-    low = [-3, -3, -3, -3, -3, -3]
-    high = [3, 3, 3, 3, 3, 3]
+    low = [-3, -3, -3, -3, -3, -3, -3]
+    high = [3, 3, 3, 3, 3, 3, 3]
 
     return low, high
+  
+  """ function for velocities as command"""
+  # def get_target_obs_bounds(self):
+  #   """Get bounds for target observations.
 
+  #   Returns:
+  #     low: Array containing the minimum value for each target observation
+  #       features.
+  #     high: Array containing the maximum value for each target observation
+  #       features.
+  #   """
+  #   low = [-3, -3, -3, -3, -3, -3]
+  #   high = [3, 3, 3, 3, 3, 3]
+
+  #   return low, high
+
+  """ original function """
   # def get_target_obs_bounds(self):
   #   """Get bounds for target observations.
 
@@ -376,9 +402,9 @@ class ImitationTask(object):
 
   #   return low, high
 
-  # def set_ref_state_init_prob(self, prob):
-  #   self._ref_state_init_prob = prob
-  #   return
+  def set_ref_state_init_prob(self, prob):
+    self._ref_state_init_prob = prob
+    return
 
   def reward(self, env):
     """Get the reward without side effects."""
@@ -397,12 +423,18 @@ class ImitationTask(object):
              + self._root_velocity_weight * root_velocity_reward
 
     """reward function inversée"""
+    # reward = self._root_pose_weight * pose_reward \
+    #          + self._velocity_weight * velocity_reward \
+    #          + self._end_effector_weight * end_effector_reward \
+    #          + self._pose_weight * root_pose_reward \
+    #          + self._root_velocity_weight * root_velocity_reward
+
+    """reward function modifiée"""
     # reward = 0.05 * pose_reward \
     #          + 0.05 * velocity_reward \
     #          + 0.1 * end_effector_reward \
     #          + 0.6 * root_pose_reward \
     #          + 0.2 * root_velocity_reward
-
 
     return reward * self._weight
 
@@ -978,7 +1010,6 @@ class ImitationTask(object):
 
       motion.set_frame_root_rot(root_rot, pose)
       motion.set_frame_root_pos(root_pos, pose)
-      # print("************* POSE = ", pose, "*******************")
 
     return pose
 
