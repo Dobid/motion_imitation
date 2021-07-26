@@ -11,6 +11,6 @@ module load mpi/openmpi_3.1.0-x86_64
 eval "$(conda shell.bash hook)"
 conda activate /home/projets/RESEARCH/SUR/motion_imi
 echo $CONDA_DEFAULT_ENV
-mpiexec -n 31 python3 $PROJECT_ROOT/motion_imitation_ws/motion_imitation/run.py --mode train --motion_file $PROJECT_ROOT/motion_imitation_ws/motion_imitation/data/motions/data_train_9.txt --int_save_freq 10000000 --total_timesteps 2000000000 --output_dir $PROJECT_ROOT/motion_imitation_ws/output/yaw_test --sync_reference
+mpiexec -n 31 python3 $PROJECT_ROOT/motion_imitation_ws/motion_imitation/run.py --mode train --motion_file $PROJECT_ROOT/motion_imitation_ws/motion_imitation/data/motions/data_train_13.txt --int_save_freq 10000000 --total_timesteps 2000000000 --output_dir $PROJECT_ROOT/motion_imitation_ws/output --sync_reference
 cp fichiers $SLURM_SUBMIT_DIR
 # rm -Rf /home/scratch/$USER/$SLURM_JOB_ID

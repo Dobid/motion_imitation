@@ -114,8 +114,8 @@ class ImitationWrapperEnv(object):
       observations from the reference motion.
     """
     noise = np.random.uniform(-1,1,6) * np.array([0.2, 0.2, 0.2, 0.1744, 0.1744, 0.1744])
-    # target_observation = self._task.build_target_obs() + noise
-    target_observation = self._task.build_target_obs()
+    target_observation = self._task.build_target_obs() + noise
+    # target_observation = self._task.build_target_obs()
     # print("CMD_VEL = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
