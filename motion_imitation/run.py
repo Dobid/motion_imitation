@@ -125,12 +125,13 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
     if done:
       # cmd = np.array(cmd)
-      robot_positions = np.array(env._robot_positions)
-      ref_positions = np.array(env._ref_positions)
-      X = robot_positions[:,0]
-      y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
-      # plot_graphs(X,y_pos)
-      # plt.plot(robot_positions[:,0], robot_positions[:,1])
+      # robot_positions = np.array(env._robot_positions)
+      # ref_positions = np.array(env._ref_positions)
+      # X = robot_positions[:,0]
+      # X = np.linspace(0, cmd.shape[0], cmd.shape[0])
+      # cmd = cmd[:,-3:]
+      # y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
+      # plot_graphs(X,cmd)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return
@@ -147,10 +148,12 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
   return
 
-def plot_graphs(X,y_pos):
-  y_pos = np.transpose(y_pos)
-  labels = ['trajectoire robot', 'trajectoire reference']
-  for y, label in zip(y_pos, labels):
+def plot_graphs(X,cmd):
+  cmd = np.transpose(cmd)
+  # X = np.transpose(X)
+  labels = ['roll', 'pitch', 'yaw']
+  print(cmd.shape)
+  for y, label in zip(cmd, labels):
     plt.plot(X, y, label=label)
   # plt.ylim(-1,1)
   plt.legend()
@@ -184,16 +187,16 @@ def plot_graphs(X,y_pos):
 def main():
   # Parsing arguments from the python command
   arg_parser = argparse.ArgumentParser()
-  arg_parser.add_argument("--seed", dest="seed", type=int, default=None)
-  arg_parser.add_argument("--mode", dest="mode", type=str, default="train")
-  arg_parser.add_argument("--motion_file", dest="motion_file", type=str, default="motion_imitation/data/motions/dog_pace.txt")
-  arg_parser.add_argument("--visualize", dest="visualize", action="store_true", default=False)
-  arg_parser.add_argument("--output_dir", dest="output_dir", type=str, default="output")
-  arg_parser.add_argument("--num_test_episodes", dest="num_test_episodes", type=int, default=None)
-  arg_parser.add_argument("--model_file", dest="model_file", type=str, default="")
-  arg_parser.add_argument("--total_timesteps", dest="total_timesteps", type=int, default=2e8)
+  arg_parser.add_argument("--seed", dest="seed", type=int, default=None) # custom random seed
+  arg_parser.add_argument("--mode", dest="mode", type=str, default="train") # choose mode : train or test
+  arg_parser.add_argument("--motion_file", dest="motion_file", type=str, default="motion_imitation/data/motions/dog_pace.txt") # motion file, motion capture reference path
+  arg_parser.add_argument("--visualize", dest="visualize", action="store_true", default=False) # set visualization, disable for training
+  arg_parser.add_argument("--output_dir", dest="output_dir", type=str, default="output") # output directory path for storing tensorboard files and model.zip
+  arg_parser.add_argument("--num_test_episodes", dest="num_test_episodes", type=int, default=None) # number of episodes for 1 rollout during 
+  arg_parser.add_argument("--model_file", dest="model_file", type=str, default="") # model file to load for testing or retraining
+  arg_parser.add_argument("--total_timesteps", dest="total_timesteps", type=int, default=2e8) # total number of timesteps for training a policy
   arg_parser.add_argument("--int_save_freq", dest="int_save_freq", type=int, default=0) # save intermediate model every n policy steps
-  arg_parser.add_argument("--sync_reference", dest="sync_reference", action="store_true", default=False)
+  arg_parser.add_argument("--sync_reference", dest="sync_reference", action="store_true", default=False) # sync reference ghost to robot body
 
   args = arg_parser.parse_args()
   
