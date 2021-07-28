@@ -217,13 +217,11 @@ def main():
                                         arg_enable_cycle_sync=args.sync_reference,
                                         enable_rendering=args.visualize)
 
-  if args.model_file != "": # 
+  if args.model_file != "": # loading model from file (for test or re-training)
     print("loading model from provided model file")
-    # model.load_parameters(args.model_file)
-    # model.load(load_path=args.model_file, env=env)
     model = ppo_imitation.PPOImitation.load(load_path=args.model_file, env=env)
     model.tensorboard_log = args.output_dir
-  else:
+  else: # creating new model (for training from scratch)
     print("no provided model file, creating a new one")
     model = build_model(env=env,
                       num_procs=num_procs,
@@ -231,13 +229,13 @@ def main():
                       optim_batchsize=OPTIM_BATCHSIZE,
                       output_dir=args.output_dir)
 
-  if args.mode == "train":
+  if args.mode == "train": # train mode
       train(model=model, 
             env=env, 
             total_timesteps=args.total_timesteps,
             output_dir=args.output_dir,
             int_save_freq=args.int_save_freq)
-  elif args.mode == "test":
+  elif args.mode == "test": # test mode
       test(model=model,
            env=env,
            num_procs=num_procs,
