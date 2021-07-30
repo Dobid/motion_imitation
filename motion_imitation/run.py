@@ -83,12 +83,12 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
 
 
 def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
-  if (output_dir == ""):
-    save_path = None
-  else:
-    save_path = os.path.join(output_dir, "model.zip")
-    if not os.path.exists(output_dir):
-      os.makedirs(output_dir)
+  # if (output_dir == ""):
+  #   save_path = None
+  # else:
+  #   save_path = os.path.join(output_dir, "model.zip")
+  #   if not os.path.exists(output_dir):
+  #     os.makedirs(output_dir)
   
 
   callbacks = []
@@ -99,7 +99,8 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
       callbacks.append(CheckpointCallback(save_freq=int_save_freq, save_path=int_dir,
                                           name_prefix='model'))
   print("TOTAL TIMESTEPS = ", total_timesteps)
-  model.learn(total_timesteps=total_timesteps, save_path=save_path, callback=callbacks)
+  # model.learn(total_timesteps=total_timesteps, save_path=save_path, callback=callbacks)
+  model.learn(total_timesteps=total_timesteps, save_path=output_dir, callback=callbacks)
 
   return
 
@@ -120,16 +121,20 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
     # print("cmd_vel = ", o[-6:])
-    # cmd.append(o[-6:])
+    # cmd.append(o[-7:])
     curr_return += r
 
     if done:
       # cmd = np.array(cmd)
       # robot_positions = np.array(env._robot_positions)
       # ref_positions = np.array(env._ref_positions)
+      ref_rotations = np.array(env._ref_rotations)
+      # print(ref_rotations[:,0])
+      # X = np.linspace(0, ref_rotations[:,0].shape[0], ref_rotations[:,0].shape[0])
       # X = robot_positions[:,0]
       # X = np.linspace(0, cmd.shape[0], cmd.shape[0])
-      # cmd = cmd[:,-3:]
+      # cmd = cmd[:,-4:]
+      # cmd = cmd[:,3]
       # y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
       # plot_graphs(X,cmd)
       if sync_ref:
@@ -150,11 +155,14 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
 def plot_graphs(X,cmd):
   cmd = np.transpose(cmd)
+  # print(cmd)
   # X = np.transpose(X)
   labels = ['roll', 'pitch', 'yaw']
   print(cmd.shape)
-  for y, label in zip(cmd, labels):
-    plt.plot(X, y, label=label)
+  print(X.shape)
+  plt.plot(X, cmd)
+  # for y, label in zip(cmd, labels):
+  #   plt.plot(X, y, label=label)
   # plt.ylim(-1,1)
   plt.legend()
   plt.show()

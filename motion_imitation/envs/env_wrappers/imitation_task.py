@@ -264,6 +264,11 @@ class ImitationTask(object):
 
   """ function with (vx, vy, vz, qx, qy, qz, qw) - linear velocity + quaternion as target obs"""
   def build_target_obs(self):
+    """Constructs the target observations (eg. command), consisting of linear and angular positions (quaternion) of the body/root of the robot
+
+    Returns:
+      An array containing the velocity + angular positions of the body/root of the robot
+    """
 
     time = self._get_motion_time()
 
@@ -274,7 +279,7 @@ class ImitationTask(object):
     command = np.concatenate([root_vel_lin, root_rot_pos], axis=-1)
     return command
 
-  """ function with (vx, vy, vz, vr, vp, vy) - velocity command as target obs"""
+  """ function with (vx, vy, vz, dr, dp, dy) - velocity command as target obs"""
   # def build_target_obs(self):
   #   """Constructs the target observations (eg. command), consisting of linear and angular velocities of the body/root of the robot
 
@@ -365,7 +370,7 @@ class ImitationTask(object):
   #   low = [-3, -3, -3, -3, -3, -3]
   #   high = [3, 3, 3, 3, 3, 3]
 
-  #   return low, high
+    # return low, high
 
   """ original function """
   # def get_target_obs_bounds(self):

@@ -1,0 +1,4 @@
+train turn : data_train_14.txt
+mauvaise référence (mouvements incorrects au niveau des pattes de la réf)
+le robot n'apprend pas autre chose que de rester debout
+le train a été fait avec du noise sur la commande (vit lin + pos ang quaternion) : noise = np.random.uniform(-1,1,7) * np.array([0.2, 0.2, 0.2, 0.01, 0.01, 0.01, 0.01]) # noise for (vx, vy, vz, qx, qy, qz, qw) command
