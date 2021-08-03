@@ -82,7 +82,6 @@ class LocomotionGymEnv(gym.Env):
     # A dictionary containing the objects in the world other than the robot.
     self._world_dict = {}
     self._task = task
-    print("task : ", self._task)
 
     self._env_randomizers = env_randomizers if env_randomizers else []
 
