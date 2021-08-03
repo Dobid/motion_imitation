@@ -83,12 +83,12 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
 
 
 def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
-  if (output_dir == ""):
-    save_path = None
-  else:
-    save_path = os.path.join(output_dir, "model.zip")
-    if not os.path.exists(output_dir):
-      os.makedirs(output_dir)
+  # if (output_dir == ""):
+  #   save_path = None
+  # else:
+  #   save_path = os.path.join(output_dir, "model.zip")
+  #   if not os.path.exists(output_dir):
+  #     os.makedirs(output_dir)
   
 
   callbacks = []
@@ -99,7 +99,8 @@ def train(model, env, total_timesteps, output_dir="", int_save_freq=0):
       callbacks.append(CheckpointCallback(save_freq=int_save_freq, save_path=int_dir,
                                           name_prefix='model'))
   print("TOTAL TIMESTEPS = ", total_timesteps)
-  model.learn(total_timesteps=total_timesteps, save_path=save_path, callback=callbacks)
+  # model.learn(total_timesteps=total_timesteps, save_path=save_path, callback=callbacks)
+  model.learn(total_timesteps=total_timesteps, save_path=output_dir, callback=callbacks)
 
   return
 
@@ -120,18 +121,38 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
     # print("cmd_vel = ", o[-6:])
-    # cmd.append(o[-6:])
+    # cmd.append(o[-7:])
     curr_return += r
 
     if done:
       # cmd = np.array(cmd)
+      # limb_vels_ref = np.delete(env._task._limb_vels_ref, (0), axis=0)
+      # limb_vels_sim = np.delete(env._task._limb_vels_sim, (0), axis=0)
+      # vel_reward = np.delete(env._task._vel_reward, (0), axis=0)
+      # end_eff_h_ref = np.delete(env._task._end_effs_h_ref, (0), axis=0)
+      # end_eff_h_sim = np.delete(env._task._end_effs_h_sim, (0), axis=0)
+      # end_eff_h_sim = np.abs(end_eff_h_ref - end_eff_h_sim)
+      # rewards = np.delete(env._task._rewards, (0), axis=0)
+      
       # robot_positions = np.array(env._robot_positions)
       # ref_positions = np.array(env._ref_positions)
+      # ref_rotations = np.array(env._ref_rotations)
+      # print(ref_rotations[:,0])
+      # X = np.linspace(0, ref_rotations[:,0].shape[0], ref_rotations[:,0].shape[0])
       # X = robot_positions[:,0]
       # X = np.linspace(0, cmd.shape[0], cmd.shape[0])
-      # cmd = cmd[:,-3:]
+      # cmd = cmd[:,-4:]
+      # cmd = cmd[:,3]
       # y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
-      # plot_graphs(X,cmd)
+
+      # X = np.linspace(0, limb_vels_sim.shape[0], limb_vels_sim.shape[0])
+      # for i in range (0,limb_vels_ref.shape[0]-1):
+      #   for j in range(0, limb_vels_ref.shape[1]):
+      #     limb_vels_ref[i,j] = (limb_vels_ref[i+1,j] - limb_vels_ref[i,j])
+      #     limb_vels_sim[i,j] = (limb_vels_sim[i+1,j] - limb_vels_sim[i,j])
+      
+      # plot_graphs(X,limb_vels_sim, limb_vels_ref, vel_reward) 
+      # plot_graphs(X,end_eff_h_sim, end_eff_h_ref, rewards)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return
@@ -148,41 +169,52 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
 
   return
 
-def plot_graphs(X,cmd):
-  cmd = np.transpose(cmd)
-  # X = np.transpose(X)
-  labels = ['roll', 'pitch', 'yaw']
-  print(cmd.shape)
-  for y, label in zip(cmd, labels):
-    plt.plot(X, y, label=label)
-  # plt.ylim(-1,1)
-  plt.legend()
-  plt.show()
-
-# def plot_graphs(cmd):
-#   # X = np.linspace(0,1800,1800)
+# def plot_graphs(X,cmd):
 #   cmd = np.transpose(cmd)
-#   # fig, (ax1, ax2) = plt.subplots(2)
-#   X = np.linspace(0,cmd.shape[1],cmd.shape[1])
-#   labels = ['x_lin_vel', 'y_lin_vel', 'z_lin_vel', 'roll_vel', 'pitch_vel', 'yaw_vel']
-
-#   # y_lin_vel = cmd[1]
-#   # avg_y_vel = np.mean(y_lin_vel)
-#   # ax1.plot(X, y_lin_vel)
-#   # y_lin_vel = y_lin_vel - avg_y_vel
-
-#   # pos_y = [0]
-#   # for vel in y_lin_vel:
-#   #   pos_y.append(pos_y[-1]+vel*0.033)
-#   # del pos_y[0]
-#   # ax2.plot(X, pos_y)
-
-#   for y, label in zip(cmd, labels):
-#     plt.plot(X, y, label=label)
+#   # print(cmd)
+#   # X = np.transpose(X)
+#   labels = ['roll', 'pitch', 'yaw']
+#   print(cmd.shape)
+#   print(X.shape)
+#   plt.plot(X, cmd)
+#   # for y, label in zip(cmd, labels):
+#   #   plt.plot(X, y, label=label)
+#   # plt.ylim(-1,1)
 #   plt.legend()
 #   plt.show()
 
-  # print("AVG_Y_VEL = ", avg_y_vel)
+def plot_graphs(X,sim, ref, rewards):
+  # sim = np.transpose(sim)
+  # ref = np.transpose(ref)
+  color_cycle = plt.rcParams['axes.prop_cycle']()
+  fig, (ax1, ax2, ax3) = plt.subplots(3)
+  # labels = ['hip_2_chassis', 'upper_leg_2_hip', 'lower_leg_2_upper_leg']
+  labels = ['end eff height ref', 'end eff height sim']
+
+  # y_lin_vel = cmd[1]
+  # avg_y_vel = np.mean(y_lin_vel)
+  # ax1.plot(X, y_lin_vel)
+  # y_lin_vel = y_lin_vel - avg_y_vel
+
+  # pos_y = [0]
+  # for vel in y_lin_vel:
+  #   pos_y.append(pos_y[-1]+vel*0.033)
+  # del pos_y[0]
+  # ax2.plot(X, pos_y)
+
+  # for y, label in zip(sim, labels):
+  #   ax1.plot(X, y, label=label)
+  
+  # for y, label in zip(ref, labels):
+  #   ax2.plot(X, y, label=label)
+
+  ax1.plot(X, sim, label='end eff height diff sim', **next(color_cycle))
+  ax2.plot(X, ref, label='end eff height ref', **next(color_cycle))
+  ax3.plot(X, rewards, label='rewards', **next(color_cycle))
+  lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
+  lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
+  fig.legend(lines, labels)
+  plt.show()
 
 def main():
   # Parsing arguments from the python command
@@ -217,13 +249,11 @@ def main():
                                         arg_enable_cycle_sync=args.sync_reference,
                                         enable_rendering=args.visualize)
 
-  if args.model_file != "": # 
+  if args.model_file != "": # loading model from file (for test or re-training)
     print("loading model from provided model file")
-    # model.load_parameters(args.model_file)
-    # model.load(load_path=args.model_file, env=env)
     model = ppo_imitation.PPOImitation.load(load_path=args.model_file, env=env)
     model.tensorboard_log = args.output_dir
-  else:
+  else: # creating new model (for training from scratch)
     print("no provided model file, creating a new one")
     model = build_model(env=env,
                       num_procs=num_procs,
@@ -231,13 +261,13 @@ def main():
                       optim_batchsize=OPTIM_BATCHSIZE,
                       output_dir=args.output_dir)
 
-  if args.mode == "train":
+  if args.mode == "train": # train mode
       train(model=model, 
             env=env, 
             total_timesteps=args.total_timesteps,
             output_dir=args.output_dir,
             int_save_freq=args.int_save_freq)
-  elif args.mode == "test":
+  elif args.mode == "test": # test mode
       test(model=model,
            env=env,
            num_procs=num_procs,

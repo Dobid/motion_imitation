@@ -114,7 +114,7 @@ class ImitationWrapperEnv(object):
       observations from the reference motion.
     """
     # noise = np.random.uniform(-1,1,6) * np.array([0.2, 0.2, 0.2, 0.1744, 0.1744, 0.1744]) # noise for (vx, vy, vz, dr, dp, dy) command
-    # noise = np.random.uniform(-1,1,7) * np.array([0.2, 0.2, 0.2, 0.01, 0.01, 0.01, 0.01]) # noise for (vx, vy, vz, qx, qy, qz, qw) command
+    noise = np.random.uniform(-1,1,7) * np.array([0.2, 0.2, 0.2, 0.01, 0.01, 0.01, 0.01]) # noise for (vx, vy, vz, qx, qy, qz, qw) command
     # target_observation = self._task.build_target_obs() + noise # add noise to target obs
     target_observation = self._task.build_target_obs() # target obs without noise (for testing)
     # print("CMD_VEL = ", target_observation)

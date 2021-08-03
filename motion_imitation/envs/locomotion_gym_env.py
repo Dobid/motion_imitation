@@ -82,7 +82,6 @@ class LocomotionGymEnv(gym.Env):
     # A dictionary containing the objects in the world other than the robot.
     self._world_dict = {}
     self._task = task
-    print("task : ", self._task)
 
     self._env_randomizers = env_randomizers if env_randomizers else []
 
@@ -146,6 +145,7 @@ class LocomotionGymEnv(gym.Env):
             self.all_sensors()))
     self._robot_positions = []
     self._ref_positions= []
+    self._ref_rotations = []
 
   def _build_action_space(self):
     """Builds action space based on motor control mode."""
@@ -375,8 +375,10 @@ class LocomotionGymEnv(gym.Env):
         time.sleep(time_to_sleep)
       base_pos = self._robot.GetBasePosition()
       ref_pos = self._task._get_ref_base_position()
+      ref_rot = self._task._get_ref_base_rotation()
       self._robot_positions.append(base_pos)
       self._ref_positions.append(ref_pos)
+      self._ref_rotations.append(ref_rot)
 
       # Also keep the previous orientation of the camera set by the user.
       [yaw, pitch,
