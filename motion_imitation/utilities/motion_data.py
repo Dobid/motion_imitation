@@ -106,11 +106,7 @@ class MotionData(object):
         self._enable_cycle_offset_rot = False
 
       self._frames = np.array(motion_json[self._FRAMES_KEY])
-      # self._frames[...,2] += 0.10673067 + 0.035
-      # self._frames[...,2] += 0.15
-      self._frames[...,2] += 0.05
-      # self._frames *= [0,0,1,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0] 
-      # self._frames += [0,0,0, 0.14758, 0.69150, 0.69157, 0.14758,0,0,0,0,0,0,0,0,0,0,0,0]
+      self._frames[...,2] += 0.05 # offset selon l'axe z pour placer le robot "sur" la surface du sol (utile pour les références custom)
       self._postprocess_frames(self._frames)
 
       self._frame_vels = self._calc_frame_vels()
