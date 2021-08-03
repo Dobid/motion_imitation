@@ -1,1 +1,1 @@
-sbatch -J MI_zigzag_yaw -p main -N 2 -n 31 -export=ALL motion_imi.job
+sbatch -J MI_turn -p main -N 1 -n 15 -export=ALL motion_imi.job
