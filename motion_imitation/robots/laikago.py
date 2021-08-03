@@ -299,14 +299,18 @@ class Laikago(minitaur.Minitaur):
       joint_id = self._joint_name_to_id[joint_name]
       if _CHASSIS_NAME_PATTERN.match(joint_name):
         self._chassis_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       elif _MOTOR_NAME_PATTERN.match(joint_name):
         self._motor_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       # We either treat the lower leg or the toe as the foot link, depending on
       # the urdf version used.
       elif _KNEE_NAME_PATTERN.match(joint_name):
         self._knee_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       elif _TOE_NAME_PATTERN.match(joint_name):
         self._foot_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       else:
         raise ValueError("Unknown category of joint %s" % joint_name)
 
