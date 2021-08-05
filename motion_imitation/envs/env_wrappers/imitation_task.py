@@ -585,7 +585,7 @@ class ImitationTask(object):
     # end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
 
     shifted_eff_err = end_eff_err + 1
-    threshold = 0.1
+    threshold = 0.002
     A = 1
     B = 2 * A
     C = 5.5
