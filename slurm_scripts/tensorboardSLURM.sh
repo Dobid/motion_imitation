@@ -4,7 +4,7 @@
 #SBATCH -o /home/projets/RESEARCH/SUR/motion_imitation_ws/tensorboard_out/tb-%J.out
 
 source /home/users/dolivare/.bash_profile #TODO: Your profile
-MODEL_DIR=/home/projets/RESEARCH/SUR/motion_imitation_ws/output/turn/PPO1_13 #TODO: Your TF model directory
+MODEL_DIR=/home/projets/RESEARCH/SUR/motion_imitation_ws/output/data_train_18/PPO1_14 #TODO: Your TF model directory
 let ipnport=($UID-6025)%65274
 echo ipnport=$ipnport
 

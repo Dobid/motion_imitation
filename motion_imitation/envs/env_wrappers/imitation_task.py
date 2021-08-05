@@ -576,15 +576,17 @@ class ImitationTask(object):
         end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
         # print("end_pos_ref j = ", j, " ", end_pos_ref)
         # print("rel_end_pos_ref j = ", j, " ", rel_end_pos_ref)
-        if abs(end_pos_ref[2] - end_pos_sim[2]) > 0.04:
-          rew_zero = True
-          break
+        
         end_pos_err = (
             rel_end_pos_diff[0] * rel_end_pos_diff[0] +
             rel_end_pos_diff[1] * rel_end_pos_diff[1] +
             height_err_scale * end_pos_diff_height * end_pos_diff_height)
 
         end_eff_err += end_pos_err
+        if abs(end_pos_ref[2] - end_pos_sim[2]) > 0.02:
+          rew_zero = True
+          break
+
     end_eff_h_ref = np.array(end_eff_h_ref)
     end_eff_h_sim = np.array(end_eff_h_sim)
     self._end_effs_h_ref = np.append(self._end_effs_h_ref, end_eff_h_ref, axis=0)
