@@ -1,0 +1,7 @@
+train sur 16M d'itérations (une nuit sur un noeud serveur)
+train précédent (static_turn_quater_data_18) : robot qui vibre/piétinne (mouvements bcp moins amples), ne respecte plus l'allure de la référence. 
+Changement de la fonction de reward en altérant le sous-reward du end effector (bout de la patte) : si la valeur absolue de la différence de hauteur 
+entre le end eff de la ref et de la sim est supérieure à un certain seuil (0.04) alors on met le reward total à 0. Tout ceci est pour l'obliger à plus (+) lever
+les pattes et donc l'empêcher de tourner en vibrant.
+Résultat : le robot fait un demi pas rapide pour s'orienter un peu vers la gauche, mais reste immobile le reste du temps.
+Hypothèse : soit le code lancé ne procède pas à la mise à zéro du reward total (par erreur lors du lancement), soit le seuil n'est pas assez petit. Futur test : stq_d18_endeff_rew_2.

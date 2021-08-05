@@ -398,7 +398,6 @@ class PPOImitation(pposgd_simple.PPO1):
                             save_path_old = os.path.join(save_path, "model" + str(max_reward_all) + ".zip")
                             self.save(save_path_old)
                             print("Saving at max reward of whole training. Max_reward = ", max_reward_all)
-                            save_path = "output"
                             firstsave = False
 
                     iters_so_far += 1
