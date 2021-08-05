@@ -293,13 +293,13 @@ class ImitationTask(object):
   #     An array containing the velocity of the body/root of the robot
   #   """
   #   time0 = self._get_motion_time()
-  #   """ compute cmd vel from reference motion txt file """
+  #   #compute cmd vel from reference motion txt file
   #   root_cmd_vel = self._calc_ref_vel(time0)[0:6]
 
-  #   """ setting custom velocity command """
+  #   # setting custom velocity command 
   #   # root_cmd_vel = np.array([0, 2, 0, 0, 0, 0])
 
-  #   return root_cmd_vel
+    # return root_cmd_vel
 
   """ original function """
   # def build_target_obs(self):
@@ -426,15 +426,12 @@ class ImitationTask(object):
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
     
-    """reward function de base"""
-    if end_eff_zero_rew is True:
-      reward = 0
-    else:
-      reward = self._pose_weight * pose_reward \
-              + self._velocity_weight * velocity_reward \
-              + self._end_effector_weight * end_effector_reward \
-              + self._root_pose_weight * root_pose_reward \
-              + self._root_velocity_weight * root_velocity_reward
+    """fonction de reward classique"""
+    reward = self._pose_weight * pose_reward \
+            + self._velocity_weight * velocity_reward \
+            + self._end_effector_weight * end_effector_reward \
+            + self._root_pose_weight * root_pose_reward \
+            + self._root_velocity_weight * root_velocity_reward
 
     """reward function inversée"""
     # reward = self._root_pose_weight * pose_reward \
@@ -550,7 +547,6 @@ class ImitationTask(object):
     height_err_scale = self._end_effector_height_err_scale
     end_eff_h_sim = []
     end_eff_h_ref = []
-    rew_zero = False
 
     for j in range(num_joints):
       is_end_eff = (j in robot._foot_link_ids)
@@ -574,26 +570,95 @@ class ImitationTask(object):
 
         rel_end_pos_diff = rel_end_pos_ref - rel_end_pos_sim
         end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
-        # print("end_pos_ref j = ", j, " ", end_pos_ref)
-        # print("rel_end_pos_ref j = ", j, " ", rel_end_pos_ref)
-        
         end_pos_err = (
             rel_end_pos_diff[0] * rel_end_pos_diff[0] +
             rel_end_pos_diff[1] * rel_end_pos_diff[1] +
             height_err_scale * end_pos_diff_height * end_pos_diff_height)
 
         end_eff_err += end_pos_err
-        if abs(end_pos_ref[2] - end_pos_sim[2]) > 0.02:
-          rew_zero = True
-          break
 
     end_eff_h_ref = np.array(end_eff_h_ref)
     end_eff_h_sim = np.array(end_eff_h_sim)
     self._end_effs_h_ref = np.append(self._end_effs_h_ref, end_eff_h_ref, axis=0)
     self._end_effs_h_sim = np.append(self._end_effs_h_sim, end_eff_h_sim, axis=0)
-    end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
+    # end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
 
-    return end_effector_reward, rew_zero
+    shifted_eff_err = end_eff_err + 1
+    threshold = 0.002
+    A = 1
+    B = 2 * A
+    C = 5.5
+    D = - threshold - 1
+    end_effector_reward = A - B / (1 + np.exp(-C*(shifted_eff_err+D)))
+    return end_effector_reward
+
+  # def _calc_reward_end_effector(self):
+  #   """Get the end effector reward."""
+  #   env = self._env
+  #   robot = env.robot
+  #   sim_model = robot.quadruped
+  #   ref_model = self._ref_model
+  #   pyb = self._get_pybullet_client()
+
+  #   root_pos_ref = self._get_ref_base_position()
+  #   root_rot_ref = self._get_ref_base_rotation()
+  #   root_pos_sim = self._get_sim_base_position()
+  #   root_rot_sim = self._get_sim_base_rotation()
+
+  #   heading_rot_ref = self._calc_heading_rot(root_rot_ref)
+  #   heading_rot_sim = self._calc_heading_rot(root_rot_sim)
+  #   inv_heading_rot_ref = transformations.quaternion_conjugate(heading_rot_ref)
+  #   inv_heading_rot_sim = transformations.quaternion_conjugate(heading_rot_sim)
+
+  #   end_eff_err = 0.0
+  #   num_joints = self._get_num_joints()
+  #   height_err_scale = self._end_effector_height_err_scale
+  #   end_eff_h_sim = []
+  #   end_eff_h_ref = []
+  #   rew_zero = False
+
+  #   for j in range(num_joints):
+  #     is_end_eff = (j in robot._foot_link_ids)
+  #     if (is_end_eff):
+  #       end_state_ref = pyb.getLinkState(ref_model, j)
+  #       end_state_sim = pyb.getLinkState(sim_model, j)
+  #       end_pos_ref = np.array(end_state_ref[0])
+  #       end_pos_sim = np.array(end_state_sim[0])
+
+  #       if j in range(0,3):
+  #         end_eff_h_ref.append(end_state_ref[0][2])
+  #         end_eff_h_sim.append(end_state_sim[0][2])
+
+  #       rel_end_pos_ref = end_pos_ref - root_pos_ref
+  #       rel_end_pos_ref = pose3d.QuaternionRotatePoint(rel_end_pos_ref,
+  #                                                      inv_heading_rot_ref)
+
+  #       rel_end_pos_sim = end_pos_sim - root_pos_sim
+  #       rel_end_pos_sim = pose3d.QuaternionRotatePoint(rel_end_pos_sim,
+  #                                                      inv_heading_rot_sim)
+
+  #       rel_end_pos_diff = rel_end_pos_ref - rel_end_pos_sim
+  #       end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
+  #       # print("end_pos_ref j = ", j, " ", end_pos_ref)
+  #       # print("rel_end_pos_ref j = ", j, " ", rel_end_pos_ref)
+
+  #       # si la différence de hauteur entre une des pattes de la sim et de la ref est supérieur à 0.04 alors on renvoie un bool à True
+  #       if abs(end_pos_ref[2] - end_pos_sim[2]) > 0.04:
+  #         rew_zero = True
+  #         break
+  #       end_pos_err = (
+  #           rel_end_pos_diff[0] * rel_end_pos_diff[0] +
+  #           rel_end_pos_diff[1] * rel_end_pos_diff[1] +
+  #           height_err_scale * end_pos_diff_height * end_pos_diff_height)
+
+  #       end_eff_err += end_pos_err
+  #   end_eff_h_ref = np.array(end_eff_h_ref)
+  #   end_eff_h_sim = np.array(end_eff_h_sim)
+  #   self._end_effs_h_ref = np.append(self._end_effs_h_ref, end_eff_h_ref, axis=0)
+  #   self._end_effs_h_sim = np.append(self._end_effs_h_sim, end_eff_h_sim, axis=0)
+  #   end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
+
+  #   return end_effector_reward, rew_zero
 
   def _calc_reward_root_pose(self):
     """Get the root pose reward."""
