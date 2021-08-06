@@ -1,2 +1,0 @@
-(200M+300M)+280M(tweaked reward) = 210 ~ 240
-custom_ref_1 (70M) : 1.3
