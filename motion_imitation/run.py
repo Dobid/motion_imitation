@@ -152,7 +152,7 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
       #     limb_vels_sim[i,j] = (limb_vels_sim[i+1,j] - limb_vels_sim[i,j])
       
       # plot_graphs(X,limb_vels_sim, limb_vels_ref, vel_reward)
-      plot_graphs(X,end_eff_h_diff, end_eff_h_ref, rewards)
+      # plot_graphs(X,end_eff_h_diff, end_eff_h_ref, rewards)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return
