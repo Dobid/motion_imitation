@@ -422,30 +422,24 @@ class ImitationTask(object):
     del env
     pose_reward = self._calc_reward_pose()
     velocity_reward = self._calc_reward_velocity()
-    end_effector_reward, end_eff_zero_rew = self._calc_reward_end_effector()
+    end_effector_reward = self._calc_reward_end_effector()
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
     
     """fonction de reward classique"""
-    reward = self._pose_weight * pose_reward \
-            + self._velocity_weight * velocity_reward \
-            + self._end_effector_weight * end_effector_reward \
-            + self._root_pose_weight * root_pose_reward \
-            + self._root_velocity_weight * root_velocity_reward
+    # reward = self._pose_weight * pose_reward \
+    #         + self._velocity_weight * velocity_reward \
+    #         + self._end_effector_weight * end_effector_reward \
+    #         + self._root_pose_weight * root_pose_reward \
+    #         + self._root_velocity_weight * root_velocity_reward
 
-    """reward function inversée"""
-    # reward = self._root_pose_weight * pose_reward \
-    #          + self._velocity_weight * velocity_reward \
-    #          + self._end_effector_weight * end_effector_reward \
-    #          + self._pose_weight * root_pose_reward \
-    #          + self._root_velocity_weight * root_velocity_reward
+    """reward function endeff sigmoid + poids modifiés"""
+    reward = 0.5 * pose_reward \
+            + 0.05 * velocity_reward \
+            + 0.35 * end_effector_reward \
+            + 0.05 * root_pose_reward \
+            + 0.05 * root_velocity_reward
 
-    """reward function modifiée"""
-    # reward = 0.05 * pose_reward \
-    #          + 0.05 * velocity_reward \
-    #          + 0.1 * end_effector_reward \
-    #          + 0.6 * root_pose_reward \
-    #          + 0.2 * root_velocity_reward
     self._rewards = np.append(self._rewards, reward)
     # print("reward = {}".format(reward))
     return reward * self._weight
@@ -524,6 +518,7 @@ class ImitationTask(object):
 
     return vel_reward
 
+  """ sous fonction de reward end eff (sigmoide)"""
   def _calc_reward_end_effector(self):
     """Get the end effector reward."""
     env = self._env
@@ -585,7 +580,7 @@ class ImitationTask(object):
     # end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
 
     shifted_eff_err = end_eff_err + 1
-    threshold = 0.002
+    threshold = 1e-5
     A = 1
     B = 2 * A
     C = 5.5
@@ -593,6 +588,7 @@ class ImitationTask(object):
     end_effector_reward = A - B / (1 + np.exp(-C*(shifted_eff_err+D)))
     return end_effector_reward
 
+  """ sous fonction de reward pour les end_effectors original"""
   # def _calc_reward_end_effector(self):
   #   """Get the end effector reward."""
   #   env = self._env

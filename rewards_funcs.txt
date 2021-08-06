@@ -1,0 +1,27 @@
+  """fonction de reward classique"""
+    # reward = self._pose_weight * pose_reward \
+    #         + self._velocity_weight * velocity_reward \
+    #         + self._end_effector_weight * end_effector_reward \
+    #         + self._root_pose_weight * root_pose_reward \
+    #         + self._root_velocity_weight * root_velocity_reward
+
+    """reward function inversée"""
+    # reward = self._root_pose_weight * pose_reward \
+    #          + self._velocity_weight * velocity_reward \
+    #          + self._end_effector_weight * end_effector_reward \
+    #          + self._pose_weight * root_pose_reward \
+    #          + self._root_velocity_weight * root_velocity_reward
+
+    """reward function endeff sigmoid + poids modifiés"""
+    reward = 0.5 * pose_reward \
+            + 0.05 * velocity_reward \
+            + 0.35 * end_effector_reward \
+            + 0.05 * root_pose_reward \
+            + 0.05 * root_velocity_reward
+
+    """reward function modifiée"""
+    # reward = 0.05 * pose_reward \
+    #          + 0.05 * velocity_reward \
+    #          + 0.1 * end_effector_reward \
+    #          + 0.6 * root_pose_reward \
+    #          + 0.2 * root_velocity_reward
