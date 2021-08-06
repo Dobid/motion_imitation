@@ -129,10 +129,10 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
       # limb_vels_ref = np.delete(env._task._limb_vels_ref, (0), axis=0)
       # limb_vels_sim = np.delete(env._task._limb_vels_sim, (0), axis=0)
       # vel_reward = np.delete(env._task._vel_reward, (0), axis=0)
-      end_eff_h_ref = np.delete(env._task._end_effs_h_ref, (0), axis=0)
-      end_eff_h_sim = np.delete(env._task._end_effs_h_sim, (0), axis=0)
-      end_eff_h_diff = np.abs(end_eff_h_ref - end_eff_h_sim)
-      rewards = np.delete(env._task._rewards, (0), axis=0)
+      # end_eff_h_ref = np.delete(env._task._end_effs_h_ref, (0), axis=0)
+      # end_eff_h_sim = np.delete(env._task._end_effs_h_sim, (0), axis=0)
+      # end_eff_h_diff = np.abs(end_eff_h_ref - end_eff_h_sim)
+      # rewards = np.delete(env._task._rewards, (0), axis=0)
       
       # robot_positions = np.array(env._robot_positions)
       # ref_positions = np.array(env._ref_positions)
@@ -145,14 +145,14 @@ def test(model, env, num_procs, sync_ref, num_episodes=None):
       # cmd = cmd[:,3]
       # y_pos = np.column_stack((robot_positions[:,1], ref_positions[:,1]))
 
-      X = np.linspace(0, end_eff_h_sim.shape[0], end_eff_h_sim.shape[0])
+      # X = np.linspace(0, end_eff_h_sim.shape[0], end_eff_h_sim.shape[0])
       # for i in range (0,limb_vels_ref.shape[0]-1):
       #   for j in range(0, limb_vels_ref.shape[1]):
       #     limb_vels_ref[i,j] = (limb_vels_ref[i+1,j] - limb_vels_ref[i,j])
       #     limb_vels_sim[i,j] = (limb_vels_sim[i+1,j] - limb_vels_sim[i,j])
       
       # plot_graphs(X,limb_vels_sim, limb_vels_ref, vel_reward)
-      plot_graphs(X,end_eff_h_diff, end_eff_h_ref, rewards)
+      # plot_graphs(X,end_eff_h_diff, end_eff_h_ref, rewards)
       if sync_ref:
         o = env.reset()
       sum_return += curr_return

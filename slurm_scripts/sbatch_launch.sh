@@ -1,1 +1,1 @@
-sbatch -J MI_d18 -p main -N 1 -n 15 -export=ALL motion_imi.job
+sbatch -J MI_d18 -p main -N 2 -n 31 -export=ALL motion_imi.job

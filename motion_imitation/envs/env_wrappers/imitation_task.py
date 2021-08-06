@@ -422,7 +422,7 @@ class ImitationTask(object):
     del env
     pose_reward = self._calc_reward_pose()
     velocity_reward = self._calc_reward_velocity()
-    end_effector_reward, end_eff_zero_rew = self._calc_reward_end_effector()
+    end_effector_reward = self._calc_reward_end_effector()
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
     
