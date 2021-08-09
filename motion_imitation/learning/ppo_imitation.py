@@ -261,7 +261,7 @@ class PPOImitation(pposgd_simple.PPO1):
                 # rolling buffer for episode rewards
                 reward_buffer = deque(maxlen=100)
                 max_reward_epoch = 0
-                max_reward_all = 0
+                max_reward_all = -np.inf
                 save_path_old = ""
                 firstsave = True
 

@@ -578,6 +578,7 @@ class ImitationTask(object):
     self._end_effs_h_sim = np.append(self._end_effs_h_sim, end_eff_h_sim, axis=0)
     # end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
 
+    # fonction de reward : type sigmoide
     shifted_eff_err = end_eff_err + 1
     threshold = 1e-5
     A = 1
@@ -587,7 +588,7 @@ class ImitationTask(object):
     end_effector_reward = A - B / (1 + np.exp(-C*(shifted_eff_err+D)))
     return end_effector_reward
 
-  """ sous fonction de reward pour les end_effectors original"""
+  """ sous fonction de reward pour les end_effectors originale"""
   # def _calc_reward_end_effector(self):
   #   """Get the end effector reward."""
   #   env = self._env
