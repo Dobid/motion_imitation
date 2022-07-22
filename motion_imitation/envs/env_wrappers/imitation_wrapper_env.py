@@ -44,10 +44,8 @@ class ImitationWrapperEnv(object):
     self._episode_length_end = episode_length_end
     self._curriculum_steps = int(np.ceil(curriculum_steps / num_parallel_envs))
     self._total_step_count = 0
-
     if self._enable_curriculum():
       self._update_time_limit()
-
     self.seed()
     return
 
@@ -73,6 +71,7 @@ class ImitationWrapperEnv(object):
     terminated = done
 
     done |= (self.env_step_counter >= self._max_episode_steps)
+    # print("max_episode_steps = ", )
 
     if not done:
       self._total_step_count += 1
@@ -104,7 +103,8 @@ class ImitationWrapperEnv(object):
     return observation
   
   def _modify_observation(self, original_observation):
-    """Appends target observations from the reference motion to the observations.
+    """Appends target observations from the reference motion to the observations. Adds noise to command
+      to avoid neural network overfitting.
 
     Args:
       original_observation: A numpy array containing the original observations.
@@ -113,7 +113,10 @@ class ImitationWrapperEnv(object):
       A numpy array contains the initial original concatenated with target
       observations from the reference motion.
     """
-    target_observation = self._task.build_target_obs()
+    # noise = np.random.uniform(-1,1,6) * np.array([0.2, 0.2, 0.2, 0.1744, 0.1744, 0.1744]) # noise for (vx, vy, vz, dr, dp, dy) command
+    noise = np.random.uniform(-1,1,7) * np.array([0.2, 0.2, 0.2, 0.01, 0.01, 0.01, 0.01]) # noise for (vx, vy, vz, qx, qy, qz, qw) command
+    # target_observation = self._task.build_target_obs() + noise # add noise to target obs
+    target_observation = self._task.build_target_obs() # target obs without noise (for testing)
     # print("CMD_VEL = ", target_observation)
     observation = np.concatenate([original_observation, target_observation], axis=-1)
     return observation
@@ -150,4 +153,5 @@ class ImitationWrapperEnv(object):
     new_steps = int((1.0 - t) * self._episode_length_start +
                        t * self._episode_length_end)
     self._max_episode_steps = new_steps
+    # print("max_episode_steps = ", self._max_episode_steps)
     return

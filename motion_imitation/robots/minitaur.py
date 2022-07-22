@@ -431,7 +431,6 @@ class Minitaur(object):
       self._pybullet_client.resetBaseVelocity(self.quadruped, [0, 0, 0],
                                               [0, 0, 0])
       self.ResetPose(add_constraint=False)
-
     self._overheat_counter = np.zeros(self.num_motors)
     self._motor_enabled_list = [True] * self.num_motors
     self._observation_history.clear()
@@ -442,6 +441,7 @@ class Minitaur(object):
     self._SettleDownForReset(default_motor_angles, reset_time)
     if self._enable_action_filter:
       self._ResetActionFilter()
+    # input("press enter to continue")
 
   def _LoadRobotURDF(self):
     """Loads the URDF file for the robot."""

@@ -166,6 +166,12 @@ class ImitationTask(object):
     self._end_effector_height_err_scale = end_effector_height_err_scale
     self._root_pose_err_scale = root_pose_err_scale
     self._root_velocity_err_scale = root_velocity_err_scale
+    self._limb_vels_sim = np.array([[0,0,0]])
+    self._limb_vels_ref = np.array([[0,0,0]])
+    self._vel_reward = np.array([0])
+    self._end_effs_h_sim = np.array([0])
+    self._end_effs_h_ref = np.array([0])
+    self._rewards = np.array([0])
 
     return
 
@@ -262,18 +268,40 @@ class ImitationTask(object):
     """
     return self._ref_motions[self._active_motion_id]
 
+  """ function with (vx, vy, vz, qx, qy, qz, qw) - linear velocity + quaternion as target obs"""
   def build_target_obs(self):
-    """Constructs the target observations, consisting of linear and angular velocities of the body/root of the robot
+    """Constructs the target observations (eg. command), consisting of linear and angular positions (quaternion) of the body/root of the robot
 
     Returns:
-      An array containing the velocity of the body/root of the robot
+      An array containing the velocity + angular positions of the body/root of the robot
     """
-    time0 = self._get_motion_time()
-    basevel_lin_ang = self._calc_ref_vel(time0)[0:6]
-    # print("vel = ", basevel_lin_ang[3:6])
 
-    return basevel_lin_ang
+    time = self._get_motion_time()
 
+    root_rot_pos = self._calc_ref_pose(time)[3:7]
+    # print("*********** pose = ", root_rot_pos)
+    root_vel_lin = self._calc_ref_vel(time)[0:3]
+    # print("*********** vel_lin = ", root_vel_lin)
+    command = np.concatenate([root_vel_lin, root_rot_pos], axis=-1)
+    return command
+
+  """ function with (vx, vy, vz, dr, dp, dy) - velocity command as target obs"""
+  # def build_target_obs(self):
+  #   """Constructs the target observations (eg. command), consisting of linear and angular velocities of the body/root of the robot
+
+  #   Returns:
+  #     An array containing the velocity of the body/root of the robot
+  #   """
+  #   time0 = self._get_motion_time()
+  #   #compute cmd vel from reference motion txt file
+  #   root_cmd_vel = self._calc_ref_vel(time0)[0:6]
+
+  #   # setting custom velocity command 
+  #   # root_cmd_vel = np.array([0, 2, 0, 0, 0, 0])
+
+    # return root_cmd_vel
+
+  """ original function """
   # def build_target_obs(self):
   #   """Constructs the target observations, consisting of a sequence of
 
@@ -320,6 +348,7 @@ class ImitationTask(object):
 
   #   return tar_obs
 
+  """ function for linear velocity + rotation quaternion position as command """
   def get_target_obs_bounds(self):
     """Get bounds for target observations.
 
@@ -329,11 +358,27 @@ class ImitationTask(object):
       high: Array containing the maximum value for each target observation
         features.
     """
-    low = [-3, -3, -3, -3, -3, -3]
-    high = [3, 3, 3, 3, 3, 3]
+    low = [-3, -3, -3, -3, -3, -3, -3]
+    high = [3, 3, 3, 3, 3, 3, 3]
 
     return low, high
+  
+  """ function for velocities as command"""
+  # def get_target_obs_bounds(self):
+  #   """Get bounds for target observations.
 
+  #   Returns:
+  #     low: Array containing the minimum value for each target observation
+  #       features.
+  #     high: Array containing the maximum value for each target observation
+  #       features.
+  #   """
+  #   low = [-3, -3, -3, -3, -3, -3]
+  #   high = [3, 3, 3, 3, 3, 3]
+
+    # return low, high
+
+  """ original function """
   # def get_target_obs_bounds(self):
   #   """Get bounds for target observations.
 
@@ -368,35 +413,35 @@ class ImitationTask(object):
 
   #   return low, high
 
-  # def set_ref_state_init_prob(self, prob):
-  #   self._ref_state_init_prob = prob
-  #   return
+  def set_ref_state_init_prob(self, prob):
+    self._ref_state_init_prob = prob
+    return
 
   def reward(self, env):
     """Get the reward without side effects."""
     del env
-
     pose_reward = self._calc_reward_pose()
     velocity_reward = self._calc_reward_velocity()
     end_effector_reward = self._calc_reward_end_effector()
     root_pose_reward = self._calc_reward_root_pose()
     root_velocity_reward = self._calc_reward_root_velocity()
     
-    "reward function de base"
+    """fonction de reward classique"""
     # reward = self._pose_weight * pose_reward \
-    #          + self._velocity_weight * velocity_reward \
-    #          + self._end_effector_weight * end_effector_reward \
-    #          + self._root_pose_weight * root_pose_reward \
-    #          + self._root_velocity_weight * root_velocity_reward
+    #         + self._velocity_weight * velocity_reward \
+    #         + self._end_effector_weight * end_effector_reward \
+    #         + self._root_pose_weight * root_pose_reward \
+    #         + self._root_velocity_weight * root_velocity_reward
 
-    "reward function inversée"
-    reward = 0.05 * pose_reward \
-             + 0.05 * velocity_reward \
-             + 0.1 * end_effector_reward \
-             + 0.6 * root_pose_reward \
-             + 0.2 * root_velocity_reward
+    """reward function endeff sigmoid + poids modifiés"""
+    reward = 0.5 * pose_reward \
+            + 0.05 * velocity_reward \
+            + 0.35 * end_effector_reward \
+            + 0.05 * root_pose_reward \
+            + 0.05 * root_velocity_reward
 
-
+    self._rewards = np.append(self._rewards, reward)
+    # print("reward = {}".format(reward))
     return reward * self._weight
 
   def _calc_reward_pose(self):
@@ -439,12 +484,19 @@ class ImitationTask(object):
 
     vel_err = 0.0
     num_joints = self._get_num_joints()
+    limb_vel_sim = []
+    limb_vel_ref = []
 
     for j in range(num_joints):
       j_state_ref = pyb.getJointStateMultiDof(ref_model, j)
       j_state_sim = pyb.getJointStateMultiDof(sim_model, j)
       j_vel_ref = np.array(j_state_ref[1])
       j_vel_sim = np.array(j_state_sim[1])
+
+      # print("*** j_vel_sim {} = {}".format(j, j_vel_sim))
+      if j in range(0,3):
+        limb_vel_sim.append([j_state_sim[1][0]])
+        limb_vel_ref.append([j_state_ref[1][0]])
 
       j_size_ref = len(j_vel_ref)
       j_size_sim = len(j_vel_sim)
@@ -454,11 +506,19 @@ class ImitationTask(object):
         j_vel_diff = j_vel_ref - j_vel_sim
         j_vel_err = j_vel_diff.dot(j_vel_diff)
         vel_err += j_vel_err
-
+    limb_vel_sim = np.array(limb_vel_sim).transpose()
+    limb_vel_ref = np.array(limb_vel_ref).transpose()
+    # print("limb_vel_sim = {}".format(limb_vel_sim))
+    # print("limb_vel_ref = {}".format(limb_vel_ref))
+    self._limb_vels_sim = np.append(self._limb_vels_sim, limb_vel_sim, axis=0)
+    self._limb_vels_ref = np.append(self._limb_vels_ref, limb_vel_ref, axis=0)
     vel_reward = np.exp(-self._velocity_err_scale * vel_err)
+
+    self._vel_reward = np.append(self._vel_reward, [vel_reward], axis=0)
 
     return vel_reward
 
+  """ sous fonction de reward end eff (sigmoide)"""
   def _calc_reward_end_effector(self):
     """Get the end effector reward."""
     env = self._env
@@ -480,16 +540,20 @@ class ImitationTask(object):
     end_eff_err = 0.0
     num_joints = self._get_num_joints()
     height_err_scale = self._end_effector_height_err_scale
+    end_eff_h_sim = []
+    end_eff_h_ref = []
 
     for j in range(num_joints):
       is_end_eff = (j in robot._foot_link_ids)
       if (is_end_eff):
         end_state_ref = pyb.getLinkState(ref_model, j)
         end_state_sim = pyb.getLinkState(sim_model, j)
-        # print("end_state_ref = ", end_state_ref)
-        # print("end_state_sim = ", end_state_sim)
         end_pos_ref = np.array(end_state_ref[0])
         end_pos_sim = np.array(end_state_sim[0])
+
+        if j in range(0,3):
+          end_eff_h_ref.append(end_state_ref[0][2])
+          end_eff_h_sim.append(end_state_sim[0][2])
 
         rel_end_pos_ref = end_pos_ref - root_pos_ref
         rel_end_pos_ref = pose3d.QuaternionRotatePoint(rel_end_pos_ref,
@@ -509,9 +573,89 @@ class ImitationTask(object):
 
         end_eff_err += end_pos_err
 
-    end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
+    end_eff_h_ref = np.array(end_eff_h_ref)
+    end_eff_h_sim = np.array(end_eff_h_sim)
+    self._end_effs_h_ref = np.append(self._end_effs_h_ref, end_eff_h_ref, axis=0)
+    self._end_effs_h_sim = np.append(self._end_effs_h_sim, end_eff_h_sim, axis=0)
+    # end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
 
+    shifted_eff_err = end_eff_err + 1
+    threshold = 1e-5
+    A = 1
+    B = 2 * A
+    C = 5.5
+    D = - threshold - 1
+    end_effector_reward = A - B / (1 + np.exp(-C*(shifted_eff_err+D)))
     return end_effector_reward
+
+  """ sous fonction de reward pour les end_effectors original"""
+  # def _calc_reward_end_effector(self):
+  #   """Get the end effector reward."""
+  #   env = self._env
+  #   robot = env.robot
+  #   sim_model = robot.quadruped
+  #   ref_model = self._ref_model
+  #   pyb = self._get_pybullet_client()
+
+  #   root_pos_ref = self._get_ref_base_position()
+  #   root_rot_ref = self._get_ref_base_rotation()
+  #   root_pos_sim = self._get_sim_base_position()
+  #   root_rot_sim = self._get_sim_base_rotation()
+
+  #   heading_rot_ref = self._calc_heading_rot(root_rot_ref)
+  #   heading_rot_sim = self._calc_heading_rot(root_rot_sim)
+  #   inv_heading_rot_ref = transformations.quaternion_conjugate(heading_rot_ref)
+  #   inv_heading_rot_sim = transformations.quaternion_conjugate(heading_rot_sim)
+
+  #   end_eff_err = 0.0
+  #   num_joints = self._get_num_joints()
+  #   height_err_scale = self._end_effector_height_err_scale
+  #   end_eff_h_sim = []
+  #   end_eff_h_ref = []
+  #   rew_zero = False
+
+  #   for j in range(num_joints):
+  #     is_end_eff = (j in robot._foot_link_ids)
+  #     if (is_end_eff):
+  #       end_state_ref = pyb.getLinkState(ref_model, j)
+  #       end_state_sim = pyb.getLinkState(sim_model, j)
+  #       end_pos_ref = np.array(end_state_ref[0])
+  #       end_pos_sim = np.array(end_state_sim[0])
+
+  #       if j in range(0,3):
+  #         end_eff_h_ref.append(end_state_ref[0][2])
+  #         end_eff_h_sim.append(end_state_sim[0][2])
+
+  #       rel_end_pos_ref = end_pos_ref - root_pos_ref
+  #       rel_end_pos_ref = pose3d.QuaternionRotatePoint(rel_end_pos_ref,
+  #                                                      inv_heading_rot_ref)
+
+  #       rel_end_pos_sim = end_pos_sim - root_pos_sim
+  #       rel_end_pos_sim = pose3d.QuaternionRotatePoint(rel_end_pos_sim,
+  #                                                      inv_heading_rot_sim)
+
+  #       rel_end_pos_diff = rel_end_pos_ref - rel_end_pos_sim
+  #       end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
+  #       # print("end_pos_ref j = ", j, " ", end_pos_ref)
+  #       # print("rel_end_pos_ref j = ", j, " ", rel_end_pos_ref)
+
+  #       # si la différence de hauteur entre une des pattes de la sim et de la ref est supérieur à 0.04 alors on renvoie un bool à True
+  #       if abs(end_pos_ref[2] - end_pos_sim[2]) > 0.04:
+  #         rew_zero = True
+  #         break
+  #       end_pos_err = (
+  #           rel_end_pos_diff[0] * rel_end_pos_diff[0] +
+  #           rel_end_pos_diff[1] * rel_end_pos_diff[1] +
+  #           height_err_scale * end_pos_diff_height * end_pos_diff_height)
+
+  #       end_eff_err += end_pos_err
+  #   end_eff_h_ref = np.array(end_eff_h_ref)
+  #   end_eff_h_sim = np.array(end_eff_h_sim)
+  #   self._end_effs_h_ref = np.append(self._end_effs_h_ref, end_eff_h_ref, axis=0)
+  #   self._end_effs_h_sim = np.append(self._end_effs_h_sim, end_eff_h_sim, axis=0)
+  #   end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
+
+  #   return end_effector_reward, rew_zero
 
   def _calc_reward_root_pose(self):
     """Get the root pose reward."""
@@ -598,7 +742,7 @@ class ImitationTask(object):
 
     pyb = self._get_pybullet_client()
     urdf_file = self._env.robot.GetURDFFile()
-    ref_model = pyb.loadURDF(urdf_file, useFixedBase=True)
+    ref_model = pyb.loadURDF(urdf_file, useFixedBase=False)
 
     pyb.changeDynamics(ref_model, -1, linearDamping=0, angularDamping=0)
 
@@ -647,7 +791,6 @@ class ImitationTask(object):
       pyb = self._get_pybullet_client()
       j_info = pyb.getJointInfo(self._ref_model, j)
       j_state = pyb.getJointStateMultiDof(self._ref_model, j)
-
       j_pose_idx = j_info[3]
       j_vel_idx = j_info[4]
       j_pose_size = len(j_state[0])
@@ -1308,7 +1451,6 @@ class ImitationTask(object):
     root_pos = self._env.robot.GetDefaultInitPosition()
     root_rot = self._env.robot.GetDefaultInitOrientation()
     joint_pose = self._env.robot.GetDefaultInitJointPose()
-
     pose = np.concatenate([root_pos, root_rot, joint_pose])
 
     return pose

@@ -260,6 +260,10 @@ class PPOImitation(pposgd_simple.PPO1):
                 len_buffer = deque(maxlen=100)
                 # rolling buffer for episode rewards
                 reward_buffer = deque(maxlen=100)
+                max_reward_epoch = 0
+                max_reward_all = 0
+                save_path_old = ""
+                firstsave = True
 
                 while True:
                     if timesteps_so_far >= total_timesteps:
@@ -310,7 +314,6 @@ class PPOImitation(pposgd_simple.PPO1):
                     if is_root:
                         logger.log("Optimizing...")
                         logger.log(fmt_row(13, self.loss_names))
-                    go = True
                     # Here we do a bunch of optimization epochs over the data
                     for k in range(self.optim_epochs):
                         # list of tuples, each of which gives the loss for a minibatch
@@ -322,9 +325,6 @@ class PPOImitation(pposgd_simple.PPO1):
                             if writer is not None:
                                 # run loss backprop with summary, but once every 10 runs save the metadata
                                 # (memory, compute time, ...)
-                                # if go is True:
-                                #     print("batch[ob] = ", batch["ob"][0:30])
-                                #     go = False
                                 if self.full_tensorboard_log and (1 + k) % 10 == 0:
                                     run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                                     run_metadata = tf.RunMetadata()
@@ -375,6 +375,8 @@ class PPOImitation(pposgd_simple.PPO1):
                     lens, rews = map(flatten_lists, zip(*listoflrpairs))
                     len_buffer.extend(lens)
                     reward_buffer.extend(rews)
+                    max_reward_epoch = max(reward_buffer)
+                    
                     if len(len_buffer) > 0:
                         logger.record_tabular("EpLenMean", np.mean(len_buffer))
                         logger.record_tabular("EpRewMean", np.mean(reward_buffer))
@@ -383,9 +385,19 @@ class PPOImitation(pposgd_simple.PPO1):
                     current_it_timesteps = MPI.COMM_WORLD.allreduce(seg["total_timestep"])
                     timesteps_so_far += current_it_timesteps
                     self.num_timesteps += current_it_timesteps
-
-                    if is_root and (save_path is not None) and (iters_so_far % save_iters == 0):
-                      self.save(save_path)
+                    # if is_root and (save_path is not None) and (iters_so_far % save_iters == 0):
+                    #   self.save(save_path)
+                    if is_root and (save_path is not None):
+                        print("max reward epoch = ", max_reward_epoch, " | max reward all = ", max_reward_all)
+                        if max_reward_epoch >= max_reward_all:
+                            if firstsave == False:
+                                print("removing old model")
+                                os.remove(save_path_old)
+                            max_reward_all = max_reward_epoch
+                            save_path_old = os.path.join(save_path, "model" + str(max_reward_all) + ".zip")
+                            self.save(save_path_old)
+                            print("Saving at max reward of whole training. Max_reward = ", max_reward_all)
+                            firstsave = False
 
                     iters_so_far += 1
                     logger.record_tabular("EpisodesSoFar", episodes_so_far)
@@ -397,5 +409,6 @@ class PPOImitation(pposgd_simple.PPO1):
 
         if is_root:
             self.save(save_path)
+            print("save() ----- end of training")
 
         return self

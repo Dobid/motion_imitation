@@ -25,6 +25,8 @@ import logging
 import math
 import enum
 import numpy as np
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 from motion_imitation.utilities import pose3d
 from motion_imitation.utilities import motion_util
@@ -104,6 +106,7 @@ class MotionData(object):
         self._enable_cycle_offset_rot = False
 
       self._frames = np.array(motion_json[self._FRAMES_KEY])
+      self._frames[...,2] += 0.05 # offset selon l'axe z pour placer le robot "sur" la surface du sol (utile pour les références custom)
       self._postprocess_frames(self._frames)
 
       self._frame_vels = self._calc_frame_vels()

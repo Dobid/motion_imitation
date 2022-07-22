@@ -89,6 +89,9 @@ _KNEE_NAME_PATTERN = re.compile(r"\w+_lower_leg_\w+")
 _TOE_NAME_PATTERN = re.compile(r"jtoe\d*")
 
 URDF_FILENAME = "laikago/laikago_toes_limits.urdf"
+# cwd = os.getcwd()
+# URDF_FILENAME = "/home/sur/david/motion_imitation/motion_imitation/hufii_simple_urdf/robot.urdf"
+
 
 _BODY_B_FIELD_NUMBER = 2
 _LINK_A_FIELD_NUMBER = 3
@@ -155,6 +158,7 @@ class Laikago(minitaur.Minitaur):
       enable_action_interpolation=True,
       enable_action_filter=False,
       reset_time=-1,
+      # reset_time=1,
       allow_knee_contact=False,
   ):
     self._urdf_filename = urdf_filename
@@ -171,7 +175,6 @@ class Laikago(minitaur.Minitaur):
         HIP_D_GAIN, KNEE_D_GAIN, ABDUCTION_D_GAIN, HIP_D_GAIN, KNEE_D_GAIN,
         ABDUCTION_D_GAIN, HIP_D_GAIN, KNEE_D_GAIN
     ]
-
     super(Laikago, self).__init__(
         pybullet_client=pybullet_client,
         time_step=time_step,
@@ -292,17 +295,22 @@ class Laikago(minitaur.Minitaur):
     for i in range(num_joints):
       joint_info = self._pybullet_client.getJointInfo(self.quadruped, i)
       joint_name = joint_info[1].decode("UTF-8")
+      # print("JOINT_NAME = ", joint_name)
       joint_id = self._joint_name_to_id[joint_name]
       if _CHASSIS_NAME_PATTERN.match(joint_name):
         self._chassis_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       elif _MOTOR_NAME_PATTERN.match(joint_name):
         self._motor_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       # We either treat the lower leg or the toe as the foot link, depending on
       # the urdf version used.
       elif _KNEE_NAME_PATTERN.match(joint_name):
         self._knee_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       elif _TOE_NAME_PATTERN.match(joint_name):
         self._foot_link_ids.append(joint_id)
+        # print("*************** i = {} | name = {}".format(i, joint_name))
       else:
         raise ValueError("Unknown category of joint %s" % joint_name)
 
@@ -344,6 +352,7 @@ class Laikago(minitaur.Minitaur):
 
   def GetDefaultInitJointPose(self):
     """Get default initial joint pose."""
+    print("GET DEFAULT INIT JOINT POSE")
     joint_pose = (INIT_MOTOR_ANGLES + JOINT_OFFSETS) * JOINT_DIRECTIONS
     return joint_pose
 
